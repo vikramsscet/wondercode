@@ -5,7 +5,10 @@ export async function checkSupabaseConnection(client) {
   try {
     const { error } = await client.auth.admin.listUsers({ page: 1, perPage: 1 });
     if (error) {
-      return { ok: false, reason: error.status === 401 || error.status === 403 ? 'invalid_key' : 'request_failed' };
+      return {
+        ok: false,
+        reason: error.status === 401 || error.status === 403 ? 'invalid_key' : 'request_failed',
+      };
     }
     return { ok: true };
   } catch {

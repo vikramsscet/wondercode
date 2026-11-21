@@ -83,7 +83,9 @@ describe('logging', () => {
   it('redacts the authorization header', async () => {
     const lines = [];
     const logger = createLogger(config, { write: (l) => lines.push(l) });
-    await request(createApp(config, logger)).get('/api/v1/health').set('Authorization', 'Bearer SECRET');
+    await request(createApp(config, logger))
+      .get('/api/v1/health')
+      .set('Authorization', 'Bearer SECRET');
     expect(lines.join('')).not.toContain('SECRET');
   });
 });

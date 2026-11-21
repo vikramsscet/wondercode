@@ -14,6 +14,10 @@ Foundation phase. Prompts 02 (`apps/web`) and 03 (`apps/api`) are implemented; P
 - [Architecture](docs/architecture/overview.md)
 - [Development guide](docs/development.md)
 - [Supabase setup](docs/supabase-setup.md)
+- [Database schema](docs/database/schema.md)
+- [Design system](docs/design-system.md)
+- [Frontend routes](docs/architecture/frontend-routes.md)
+- [AI provider architecture](docs/ai/provider-architecture.md)
 - [Architecture decisions](docs/decisions/)
 
 ## Planned layout
@@ -21,6 +25,7 @@ Foundation phase. Prompts 02 (`apps/web`) and 03 (`apps/api`) are implemented; P
 ```
 apps/web/        React + Vite + Tailwind (Prompt 02, done)
 apps/api/        Node.js + Express API (Prompt 03, done)
+packages/shared/ Constants shared by web and API (avatars, limits)
 supabase/        Migrations and seed (Prompts 04, 06)
 docs/            Architecture, guides, decisions (ADRs)
 ```

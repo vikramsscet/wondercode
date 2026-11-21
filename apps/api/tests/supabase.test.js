@@ -31,7 +31,9 @@ describe('checkSupabaseConnection', () => {
   const fake = (impl) => ({ auth: { admin: { listUsers: impl } } });
 
   it('reports ok', async () => {
-    expect(await checkSupabaseConnection(fake(async () => ({ error: null })))).toEqual({ ok: true });
+    expect(await checkSupabaseConnection(fake(async () => ({ error: null })))).toEqual({
+      ok: true,
+    });
   });
 
   it('reports an invalid key without leaking details', async () => {
@@ -42,7 +44,11 @@ describe('checkSupabaseConnection', () => {
   });
 
   it('reports unreachable on exceptions', async () => {
-    const r = await checkSupabaseConnection(fake(async () => { throw new Error('ENOTFOUND'); }));
+    const r = await checkSupabaseConnection(
+      fake(async () => {
+        throw new Error('ENOTFOUND');
+      }),
+    );
     expect(r).toEqual({ ok: false, reason: 'unreachable' });
   });
 });

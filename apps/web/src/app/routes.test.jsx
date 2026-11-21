@@ -1,16 +1,24 @@
 import { render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { routes } from './routes.jsx';
+import { AuthProvider } from '../features/auth/AuthContext.jsx';
+import { GuestProvider } from '../features/guest/GuestContext.jsx';
 import ErrorBoundary from '../components/common/ErrorBoundary.jsx';
 
 const renderAt = (path) =>
-  render(<RouterProvider router={createMemoryRouter(routes, { initialEntries: [path] })} />);
+  render(
+    <AuthProvider>
+      <GuestProvider>
+        <RouterProvider router={createMemoryRouter(routes, { initialEntries: [path] })} />
+      </GuestProvider>
+    </AuthProvider>,
+  );
 
 describe('routes', () => {
   it('renders the home page inside the layout', () => {
     renderAt('/');
-    expect(screen.getByRole('heading', { name: 'WonderCode' })).toBeInTheDocument();
-    expect(screen.getByText(/Imagine it/)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/Imagine it/);
+    expect(screen.getByRole('button', { name: 'Try as Guest' })).toBeInTheDocument();
   });
 
   it('renders not-found for unknown paths', () => {

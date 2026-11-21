@@ -10,7 +10,7 @@
 
 - Monorepo with npm workspaces (`apps/web`, `apps/api`), see ADR 0006.
 - JavaScript with ES modules (`"type": "module"`) on both sides.
-- 2-space indent, LF line endings, UTF-8 (see `.editorconfig`). ESLint and Prettier are added in Prompt 05.
+- 2-space indent, LF line endings, UTF-8 (see `.editorconfig`). Run `npm run lint` and `npm run format` from the root (ESLint + Prettier). API rules: docs/api/conventions.md.
 - File names: `kebab-case.js` for backend, `PascalCase.jsx` for React components.
 - API: `/api/v1`, JSON, camelCase fields, consistent envelope (see the architecture doc).
 - Tests: Vitest; Supertest for API. Each prompt ships tests for its scope.
@@ -38,5 +38,15 @@ The service-role key and AI keys must never appear in frontend code or `VITE_*` 
 | 01 Repository and architecture | Done (docs only) |
 | 02 Frontend foundation | Done |
 | 03 Backend foundation | Done |
-| 04 Supabase configuration | Done, awaiting review (live check pending credentials) |
-| 05 onward | Not started |
+| 04 Supabase configuration | Done (live connection verified) |
+| 05 API and coding standards | Done, awaiting review |
+| 06 Database schema | Done (applied to wondercode-dev) |
+| 07 Parent authentication | Done (verified live) |
+| 08 Child profile API | Done, awaiting review (verified live; cross-parent check covered by tests only) |
+| 09 Guest trial sessions | Done, awaiting review (verified live) |
+| 10 Design system | Done, awaiting review |
+| 11 Landing and onboarding | Done, awaiting review |
+| 12 Child dashboard (with profile picker, header avatar, switching) | Done, awaiting review |
+| 13 Parent dashboard shell | Done, awaiting review |
+| 14 AI provider abstraction (mock) | Done, awaiting review |
+| 15 onward | Not started |

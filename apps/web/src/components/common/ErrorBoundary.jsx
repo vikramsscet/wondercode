@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import { Button, Card } from '../ui/index.js';
 
 export default class ErrorBoundary extends Component {
   state = { hasError: false };
@@ -15,17 +16,13 @@ export default class ErrorBoundary extends Component {
   render() {
     if (!this.state.hasError) return this.props.children;
     return (
-      <div role="alert" className="mx-auto mt-16 max-w-md rounded-2xl bg-white p-8 text-center shadow">
-        <h2 className="text-xl font-bold">Oops! Something went wrong.</h2>
-        <p className="mt-2 text-slate-600">Let's try again.</p>
-        <button
-          type="button"
-          className="mt-4 rounded-full bg-indigo-600 px-5 py-2 font-semibold text-white focus:outline-none focus-visible:ring-4 focus-visible:ring-indigo-300"
-          onClick={() => this.setState({ hasError: false })}
-        >
+      <Card role="alert" className="mx-auto mt-16 max-w-md text-center">
+        <h2 className="text-xl font-extrabold">Oops! Something went wrong.</h2>
+        <p className="mt-2 text-ink-600">Let's try again.</p>
+        <Button className="mt-4" onClick={() => this.setState({ hasError: false })}>
           Try again
-        </button>
-      </div>
+        </Button>
+      </Card>
     );
   }
 }
