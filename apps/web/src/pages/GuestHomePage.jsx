@@ -24,8 +24,11 @@ export default function GuestHomePage() {
         You can look around for about {minutes} more {minutes === 1 ? 'minute' : 'minutes'}. Guest
         visits are short and do not keep your work.
       </p>
+      <Link to="/try/create" className={buttonClasses({ size: 'lg', className: 'mt-6' })}>
+        Start creating
+      </Link>
       <Alert tone="info" className="mt-6">
-        Coming soon: describe an idea and watch WonderCode build it with you!
+        Building your project from the plan is coming soon!
       </Alert>
       <Card tone="sun" className="mt-6 text-left">
         <h2 className="text-lg font-extrabold">Want to save your projects?</h2>

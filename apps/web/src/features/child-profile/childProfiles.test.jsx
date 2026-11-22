@@ -183,7 +183,7 @@ describe('child dashboard', () => {
     await screen.findByRole('heading', { level: 1 });
     expect(within(screen.getByTestId('active-child')).getByText('Mia')).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { name: 'Start with an idea' }).parentElement,
+      screen.getByRole('heading', { name: 'My Coding Journey' }).parentElement,
     ).toHaveTextContent('Preview');
     expect(screen.getByText('No projects yet')).toBeInTheDocument();
     expect(screen.getAllByText('Coming soon').length).toBeGreaterThan(0);

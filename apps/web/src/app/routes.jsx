@@ -17,6 +17,7 @@ import AuthForm from '../features/auth/AuthForm.jsx';
 import ChildLayout from '../components/layout/ChildLayout.jsx';
 import ChildRoute from '../features/child-profile/ChildRoute.jsx';
 import DashboardPage from '../pages/DashboardPage.jsx';
+import { ChildCreatePage, GuestCreatePage } from '../pages/CreatePage.jsx';
 import ProfilePickerPage from '../pages/ProfilePickerPage.jsx';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
 
@@ -28,7 +29,13 @@ export const routes = [
     // Child learning area: its own layout without any parent controls.
     element: <ChildRoute />,
     children: [
-      { element: <ChildLayout />, children: [{ path: '/dashboard', element: <DashboardPage /> }] },
+      {
+        element: <ChildLayout />,
+        children: [
+          { path: '/dashboard', element: <DashboardPage /> },
+          { path: '/create', element: <ChildCreatePage /> },
+        ],
+      },
     ],
   },
   {
@@ -38,7 +45,13 @@ export const routes = [
       ...devRoutes,
       { path: '/sign-in', element: <AuthForm mode="sign-in" /> },
       { path: '/sign-up', element: <AuthForm mode="sign-up" /> },
-      { element: <GuestRoute />, children: [{ path: '/try', element: <GuestHomePage /> }] },
+      {
+        element: <GuestRoute />,
+        children: [
+          { path: '/try', element: <GuestHomePage /> },
+          { path: '/try/create', element: <GuestCreatePage /> },
+        ],
+      },
       {
         element: <ProtectedRoute />,
         children: [

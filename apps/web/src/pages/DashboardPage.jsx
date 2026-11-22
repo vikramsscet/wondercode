@@ -1,4 +1,5 @@
-import { Badge, Card } from '../components/ui/index.js';
+import { Link } from 'react-router-dom';
+import { Badge, Card, buttonClasses } from '../components/ui/index.js';
 import Avatar from '../features/child-profile/Avatar.jsx';
 import { useChildProfiles } from '../features/child-profile/ChildProfilesContext.jsx';
 import { journeyStages, sampleChallenges, starterIdeas } from '../features/dashboard/mockData.js';
@@ -29,7 +30,7 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <Section id="ideas-heading" title="Start with an idea" preview>
+      <Section id="ideas-heading" title="Start with an idea">
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {starterIdeas.map((idea) => (
             <li key={idea.id}>
@@ -39,13 +40,20 @@ export default function DashboardPage() {
                 </span>
                 <h3 className="mt-2 text-lg font-extrabold">{idea.title}</h3>
                 <p className="text-sun-800">{idea.text}</p>
-                <Badge tone="brand" className="mt-3">
-                  Coming soon
-                </Badge>
+                <Link
+                  to="/create"
+                  state={{ prompt: idea.text }}
+                  className={buttonClasses({ variant: 'secondary', size: 'sm', className: 'mt-3' })}
+                >
+                  Start this idea
+                </Link>
               </Card>
             </li>
           ))}
         </ul>
+        <Link to="/create" className={buttonClasses({ size: 'lg', className: 'mt-5' })}>
+          Create something new
+        </Link>
       </Section>
 
       <Section id="projects-heading" title="My projects">

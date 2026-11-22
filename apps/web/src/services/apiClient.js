@@ -10,8 +10,8 @@ export class ApiError extends Error {
   }
 }
 
-// Calls the WonderCode API with the parent's access token (or a guest token when given). Unwraps the standard envelope.
-export async function apiRequest(path, { method = 'GET', body, guestToken } = {}) {
+// Calls the WonderCode API with the parent's access token (or a guest token when given), plus the active child id when acting for a child. Unwraps the standard envelope.
+export async function apiRequest(path, { method = 'GET', body, guestToken, childId } = {}) {
   const headers = { Accept: 'application/json' };
   if (body !== undefined) headers['Content-Type'] = 'application/json';
   if (guestToken) {
@@ -19,6 +19,7 @@ export async function apiRequest(path, { method = 'GET', body, guestToken } = {}
   } else if (supabase) {
     const { data } = await supabase.auth.getSession();
     if (data.session) headers.Authorization = `Bearer ${data.session.access_token}`;
+    if (childId) headers['X-Child-Id'] = childId; // the API re-checks the child belongs to this parent
   }
   const res = await fetch(`${env.apiBaseUrl}${path}`, {
     method,
