@@ -12,6 +12,7 @@ Foundation phase. Prompts 02 (`apps/web`) and 03 (`apps/api`) are implemented; P
 
 - [Product and technical blueprint](WonderCode_Product_and_Technical_Blueprint_README.md): requirements, API, schema, roadmap (source of truth)
 - [Architecture](docs/architecture/overview.md)
+- [Progress and how to resume](docs/progress.md)
 - [Development guide](docs/development.md)
 - [Supabase setup](docs/supabase-setup.md)
 - [Database schema](docs/database/schema.md)

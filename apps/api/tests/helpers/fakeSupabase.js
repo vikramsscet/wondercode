@@ -6,6 +6,7 @@ export function createFakeSupabase({ users = {}, tables = {} } = {}) {
     parent_profiles: [],
     guest_sessions: [],
     projects: [],
+    usage_events: [],
     ...tables,
   };
   let seq = 0;

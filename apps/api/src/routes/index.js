@@ -3,6 +3,7 @@ import health from './health.js';
 import children from '../modules/children/children.routes.js';
 import { createGuestRouter } from '../modules/guests/guests.routes.js';
 import auth from '../modules/auth/auth.routes.js';
+import { createPromptsRouter } from '../modules/prompts/prompts.routes.js';
 
 // Mounted at /api/v1. Feature routers are added here by later prompts.
 export function createRoutes(config) {
@@ -11,5 +12,6 @@ export function createRoutes(config) {
   router.use('/auth/guest-session', createGuestRouter(config));
   router.use('/auth', auth);
   router.use('/children', children);
+  router.use('/prompts', createPromptsRouter(config));
   return router;
 }
