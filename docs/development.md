@@ -56,4 +56,5 @@ The service-role key and AI keys must never appear in frontend code or `VITE_*` 
 | 19 Code validation (`validateProject`, `POST /projects/validate`) | Done, approved |
 | 20 Workspace layout (`/workspace`, `/try/workspace`) | Done, approved |
 | 21 Monaco editor (edit, switch files, selected lines) | Done, approved |
-| 22 onward | Not started |
+| 22 Sandboxed preview (`PreviewPane`, Run button) | Done, approved |
+| 23 onward | Not started |

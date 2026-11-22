@@ -98,7 +98,12 @@ export default function Workspace({ files, title }) {
             show('preview'),
           )}
         >
-          <PreviewPane />
+          <PreviewPane
+            files={project.files.map((f) => ({
+              path: f.path,
+              content: edits[f.path] ?? f.content,
+            }))}
+          />
         </div>
       </div>
     </section>

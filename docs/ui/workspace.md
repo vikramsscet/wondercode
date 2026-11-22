@@ -12,7 +12,7 @@ Layout shell for viewing a project's files. Code lives in `apps/web/src/features
 - `FileExplorer`: file list, icon per type, `aria-current` on the active file, Up/Down/Home/End keys.
 - `EditorPane`: wraps the Monaco editor (Prompt 21), lazy-loaded, with a status line showing the selected lines and a "Changed, not saved" marker.
 - `MonacoEditor`: Monaco bundled locally (no CDN), HTML/CSS/JS highlighting, line numbers, no minimap, word wrap, 16px font. One model per file path, so undo history and cursor survive file switching. Language services (validation, suggestions) are not loaded.
-- `PreviewPane`: **placeholder**, runs nothing. The sandboxed iframe arrives in Prompt 22.
+- `PreviewPane`: sandboxed iframe preview with a Run button (Prompt 22), see `docs/ui/preview.md`.
 
 ## Responsive behaviour
 - `lg` and up: three columns (files 14rem, code, preview).

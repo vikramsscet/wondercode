@@ -79,7 +79,7 @@ describe('Workspace', () => {
     );
     expect(screen.getByRole('region', { name: 'Code pane' })).toHaveClass('hidden');
     expect(screen.getByRole('region', { name: 'Preview pane' })).not.toHaveClass('hidden');
-    expect(screen.getByText(/Nothing has been run yet/)).toBeInTheDocument();
+    expect(screen.getByText(/Nothing runs until you press Run/)).toBeInTheDocument();
   });
 
   it('copes with an empty project', () => {

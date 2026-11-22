@@ -3,7 +3,7 @@
 _Last updated: 2026-11-21._ The roadmap is the 42 prompts in `WonderCode_Product_and_Technical_Blueprint_README.md` (section 11).
 
 ## Where we are
-**Completed: Prompts 01 to 21 (21 of 42).** Next: **Prompt 22, Sandboxed preview.** Prompts 01 to 21 are approved and pushed.
+**Completed: Prompts 01 to 22 (22 of 42).** Next: **Prompt 23, Run, Stop and Restart.** Prompts 01 to 22 are approved and pushed.
 
 | Phase | Prompts | Status |
 |---|---|---|
@@ -11,7 +11,7 @@ _Last updated: 2026-11-21._ The roadmap is the 42 prompts in `WonderCode_Product
 | B. Data and identity | 06 to 09 | Done (schema applied to `wondercode-dev`) |
 | C. Design and navigation | 10 to 13 | Done |
 | D. AI creation | 14 to 19 | 14 to 16 approved and pushed (latest `bd2eb94`); 17 approved and pushed (`b4ac27e`); 18 approved and pushed (`4a5cab4`); 19 (code validation) approved and pushed |
-| E. Workspace and preview | 20 to 24 | 20 (workspace layout) approved and pushed (`330fd6f`); 21 (Monaco) approved and pushed |
+| E. Workspace and preview | 20 to 24 | 20 (workspace layout) approved and pushed (`330fd6f`); 21 (Monaco) approved and pushed (`20168f3`); 22 (sandboxed preview) approved and pushed |
 | F to H | 25 to 42 | Not started |
 
 ## How to resume tomorrow
@@ -20,7 +20,7 @@ _Last updated: 2026-11-21._ The roadmap is the 42 prompts in `WonderCode_Product
 3. Check the project still works:
    ```
    npm install
-   npm test            # expect 218 API + 85 web tests passing
+   npm test            # expect 218 API + 98 web tests passing
    npm run lint
    npm run dev:api     # http://localhost:3000/api/v1/health
    npm run dev:web     # http://localhost:5173   (style guide at /design)
@@ -54,4 +54,3 @@ _Last updated: 2026-11-21._ The roadmap is the 42 prompts in `WonderCode_Product
 - Project saves are not atomic (ADR 0017); a failed cleanup could leave orphan Storage files. Validation is static only (ADR 0018): the sandboxed preview is the real boundary. Not yet tried against live Supabase Storage (tests use a fake).
 
 ## Upcoming prompts, one line each
-- 22 Sandboxed iframe preview (placeholder today).
