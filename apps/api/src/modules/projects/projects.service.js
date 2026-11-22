@@ -5,6 +5,7 @@ import { moderate } from '../prompts/prompts.moderation.js';
 import { cleanPrompt } from '../prompts/prompts.text.js';
 import { enforcePlanPolicy } from '../prompts/plans.service.js';
 import { enforceGenerationPolicy } from './generation.policy.js';
+import { validateProject } from '../validation/validateProject.js';
 import * as repo from './projects.repository.js';
 import * as storage from './projects.storage.js';
 
@@ -13,7 +14,25 @@ const sha256 = (text) => createHash('sha256').update(text, 'utf8').digest('hex')
 
 const notFound = () => new AppError(404, 'NOT_FOUND', 'Project not found.');
 
-const present = (project, version, files, extra = {}) => ({
+const GENERATION_ATTEMPTS = 2; // one automatic retry when the AI's code fails validation
+
+// Calls the AI and validates its code; retries once if the code does not pass.
+async function generateValidCode({ ai, logger = console }, owner, plan, language) {
+  let last;
+  for (let attempt = 1; attempt <= GENERATION_ATTEMPTS; attempt += 1) {
+    const { data, meta } = await ai.generateProjectCode(owner, { plan, language });
+    try {
+      return { ...enforceGenerationPolicy(data), data, meta };
+    } catch (err) {
+      if (err.code !== 'AI_INVALID_RESPONSE') throw err;
+      last = err;
+      logger.warn?.({ attempt, issues: err.issueCodes }, 'generated code failed validation');
+    }
+  }
+  throw last;
+}
+
+const present = (project, version, files, validation, extra = {}) => ({
   project: {
     id: project.id,
     title: project.title,
@@ -23,8 +42,9 @@ const present = (project, version, files, extra = {}) => ({
   },
   version: { id: version.id, versionNumber: version.version_number, origin: version.origin },
   files,
-  // Full validation arrives in Prompt 19. Nothing has been run or syntax-checked yet.
-  validated: false,
+  // "validated" = parsed and statically checked with no errors. The code has NOT been run.
+  validated: validation.valid,
+  validation,
   ...extra,
 });
 
@@ -42,7 +62,7 @@ async function assertQuota({ supabase, config }, owner) {
 
 // Generates code from an approved plan and saves it as version 1 of a new project.
 export async function generateProject(ctx, owner, { plan, prompt = '', language }) {
-  const { supabase, ai, logger = console } = ctx;
+  const { supabase, logger = console } = ctx;
   const text = cleanPrompt(prompt);
   if (text && !moderate(text).allowed) {
     throw new AppError(
@@ -54,8 +74,12 @@ export async function generateProject(ctx, owner, { plan, prompt = '', language 
   enforcePlanPolicy(plan); // the plan came from the browser; never trust it
   await assertQuota(ctx, owner);
 
-  const { data, meta } = await ai.generateProjectCode(owner, { plan, language: language ?? 'en' });
-  const files = enforceGenerationPolicy(data);
+  const { files, validation, data, meta } = await generateValidCode(
+    ctx,
+    owner,
+    plan,
+    language ?? 'en',
+  );
 
   const projectId = randomUUID();
   const ownerPart = owner.childProfileId
@@ -102,6 +126,7 @@ export async function generateProject(ctx, owner, { plan, prompt = '', language 
       project,
       version,
       files.map((f) => ({ ...f, sizeBytes: Buffer.byteLength(f.content, 'utf8') })),
+      validation,
       { isMock: meta.isMock, learningConcepts: data.learningConcepts },
     );
   } catch (err) {
@@ -136,5 +161,8 @@ export async function getProject({ supabase }, owner, projectId) {
       sizeBytes: row.size_bytes,
     });
   }
-  return present(project, version, files);
+  return present(project, version, files, validateProject(files));
 }
+
+// Validates files without saving them (for edits and refinements). Same rules as generation.
+export const validateFiles = (files) => validateProject(files);

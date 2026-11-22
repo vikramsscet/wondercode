@@ -20,4 +20,4 @@ Owner-scoped (another owner gets 404). Returns the current version with file con
 - JS: no fetch/XHR/WebSocket/EventSource/sendBeacon/workers/imports/require, and no URL-like strings.
 - Violations return a generic `502 AI_INVALID_RESPONSE`; nothing is saved.
 
-`validated: false` is deliberate: nothing has been syntax-checked or run. Prompt 19 adds real validation results.
+Since Prompt 19 the generation rules above are enforced by the shared validator (`docs/api/validation.md`). `validated: true` means parsed and statically checked; the code has not been run. Responses include a `validation` result, and `POST /projects/validate` validates files without saving.

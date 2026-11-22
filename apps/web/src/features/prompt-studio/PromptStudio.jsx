@@ -156,6 +156,12 @@ function SavedStep({ studio }) {
           ))}
         </ul>
       </Card>
+      <Alert tone="success" className="mt-4">
+        Checked: your files have no typos and nothing unsafe.{' '}
+        {saved.validation?.warnings?.length > 0 &&
+          `We have ${saved.validation.warnings.length} tip${saved.validation.warnings.length === 1 ? '' : 's'} to share later. `}
+        It has not been run yet.
+      </Alert>
       <Alert tone="info" className="mt-4">
         Opening your project to see it and change it comes next, and it is not ready yet. Your files
         are safe.

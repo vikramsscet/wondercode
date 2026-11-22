@@ -53,4 +53,5 @@ The service-role key and AI keys must never appear in frontend code or `VITE_*` 
 | 16 Project planning (`POST /prompts/plan`) | Done, awaiting review |
 | 17 Prompt Studio UI (`/create`, `/try/create`) | Done, approved |
 | 18 Generation and saving (`POST /projects/generate`, `GET /projects/:id`) | Done, approved |
-| 19 onward | Not started |
+| 19 Code validation (`validateProject`, `POST /projects/validate`) | Done, approved |
+| 20 onward | Not started |

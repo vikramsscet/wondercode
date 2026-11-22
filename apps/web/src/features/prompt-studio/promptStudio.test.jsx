@@ -44,7 +44,8 @@ const SAVED = {
   project: { id: 'p9', title: 'My Quiz' },
   version: { versionNumber: 1 },
   files: ['index.html', 'style.css', 'script.js'].map((path) => ({ path })),
-  validated: false,
+  validated: true,
+  validation: { valid: true, errors: [], warnings: [{ code: 'js-html-sink' }] },
   isMock: true,
 };
 const reply = (status, body) => ({ ok: status < 400, status, json: async () => body });
@@ -209,6 +210,8 @@ describe('Prompt Studio', () => {
     expect(screen.getByText('script.js')).toBeInTheDocument();
     expect(screen.getByText('Sample code')).toBeInTheDocument();
     expect(screen.getByText(/not ready yet/)).toBeInTheDocument();
+    expect(screen.getByText(/It has not been run yet/)).toBeInTheDocument();
+    expect(screen.getByText(/1 tip to share/)).toBeInTheDocument();
     expect(generates[0].headers['X-Child-Id']).toBe('c1');
     expect(generates[0].body).toMatchObject({ plan: PLAN, prompt: 'a quiz about space' });
   });

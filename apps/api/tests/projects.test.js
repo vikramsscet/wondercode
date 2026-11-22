@@ -59,7 +59,7 @@ describe('generation policy', () => {
     for (const p of ['a game', 'a quiz', 'a calculator', 'an animation', 'a website']) {
       const plan = await makePlan(p);
       const { data } = await mock.generateProjectCode({ plan });
-      expect(enforceGenerationPolicy(data)).toHaveLength(3);
+      expect(enforceGenerationPolicy(data).files).toHaveLength(3);
     }
   });
 
@@ -110,7 +110,8 @@ describe('POST /projects/generate', () => {
     expect(project.projectType).toBe('quiz');
     expect(version).toMatchObject({ versionNumber: 1, origin: 'generated' });
     expect(files.map((f) => f.path)).toEqual(['index.html', 'style.css', 'script.js']);
-    expect(validated).toBe(false);
+    expect(validated).toBe(true);
+    expect(res.body.data.validation).toMatchObject({ valid: true, errors: [] });
     expect(isMock).toBe(true);
 
     expect(supabase.db.projects).toHaveLength(1);
