@@ -12,3 +12,6 @@ Flow (`usePromptStudio`): `writing` -> `thinking` -> `clarifying` | `blocked` | 
 Privacy: the prompt lives in component state only. Nothing is written to browser storage.
 Accessibility: labelled controls, focus moves to each step's heading, `role=status`/`alert` for progress and errors, 44px minimum targets.
 Entry points: dashboard "Start this idea" cards (pre-fill the prompt via router state) and "Create something new"; guest home "Start creating".
+
+## Saving (Prompt 18)
+"Looks good!" calls `POST /projects/generate` with the plan, prompt and language, shows "Building your project…", then "Your project is saved!" with the file names (and a "Sample code" badge for the mock). Opening the project is Prompt 20, so the screen says so. Save errors (limits, network) show a friendly message and "Try again" repeats the save, not the plan.

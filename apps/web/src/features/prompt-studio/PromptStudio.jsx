@@ -126,11 +126,43 @@ function WriteStep({ studio }) {
   );
 }
 
-function ThinkingStep() {
+function ThinkingStep({ message = 'Thinking about your idea…' }) {
   return (
     <div role="status" aria-live="polite" className="py-12 text-center">
       <Spinner label="" />
-      <p className="mt-3 text-xl font-bold text-brand-800">Thinking about your idea…</p>
+      <p className="mt-3 text-xl font-bold text-brand-800">{message}</p>
+    </div>
+  );
+}
+
+const SavingStep = () => <ThinkingStep message="Building your project…" />;
+
+function SavedStep({ studio }) {
+  const { saved } = studio;
+  return (
+    <div>
+      <StepHeading>Your project is saved!</StepHeading>
+      {studio.isMock && (
+        <Badge tone="sun" className="mt-2">
+          Sample code
+        </Badge>
+      )}
+      <Card tone="brand" className="mt-4">
+        <h3 className="text-2xl font-extrabold">{saved.project.title}</h3>
+        <p className="mt-1">We made these files for you:</p>
+        <ul className="mt-2 list-disc pl-6">
+          {saved.files.map((f) => (
+            <li key={f.path}>{f.path}</li>
+          ))}
+        </ul>
+      </Card>
+      <Alert tone="info" className="mt-4">
+        Opening your project to see it and change it comes next, and it is not ready yet. Your files
+        are safe.
+      </Alert>
+      <Button className="mt-6" variant="outline" size="lg" onClick={studio.edit}>
+        Make another project
+      </Button>
     </div>
   );
 }
@@ -224,7 +256,6 @@ const List = ({ items }) => (
 function ReviewStep({ studio }) {
   const { plan } = studio;
   const [lang, setLang] = useState(studio.language);
-  const [ready, setReady] = useState(false);
   return (
     <div>
       <StepHeading>Here is your plan</StepHeading>
@@ -260,13 +291,8 @@ function ReviewStep({ studio }) {
           <p className="mt-3 text-sm text-ink-600">Files: {plan.files.join(', ')}</p>
         </Card>
       </div>
-      {ready && (
-        <Alert tone="info" className="mt-4">
-          Great choice! Building your project comes next, and it is not ready yet. Check back soon.
-        </Alert>
-      )}
       <div className="mt-6 flex flex-wrap gap-3">
-        <Button size="lg" onClick={() => setReady(true)}>
+        <Button size="lg" onClick={studio.generate}>
           Looks good!
         </Button>
         <Button variant="outline" size="lg" onClick={studio.edit}>
@@ -280,6 +306,8 @@ function ReviewStep({ studio }) {
 const STEPS = {
   writing: WriteStep,
   thinking: ThinkingStep,
+  saving: SavingStep,
+  saved: SavedStep,
   clarifying: ClarifyStep,
   blocked: BlockedStep,
   error: ErrorStep,

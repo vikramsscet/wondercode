@@ -12,6 +12,13 @@ const friendlyError = (err) => {
   return "We couldn't make a plan just now. Please try again.";
 };
 
+const saveError = (err) => {
+  if (err instanceof ApiError && err.status === 409 && err.message) return err.message; // project limits
+  if (err instanceof ApiError && err.status === 429) return friendlyError(err);
+  if (err instanceof ApiError && err.status === 401) return friendlyError(err);
+  return "We couldn't build your project just now. Please try again.";
+};
+
 // Steps: writing -> thinking -> clarifying | blocked | reviewing | error.
 // The prompt lives only in memory: nothing about it is written to browser storage.
 export function usePromptStudio({
@@ -30,6 +37,8 @@ export function usePromptStudio({
     plan: null,
     isMock: false,
     notice: '',
+    saved: null,
+    failed: 'plan', // which action to repeat on Try again
   });
   const latest = useRef(0); // ignores replies that arrive after a newer request
 
@@ -66,7 +75,28 @@ export function usePromptStudio({
         }
       } catch (err) {
         if (id !== latest.current) return;
-        setState((s) => ({ ...s, step: 'error', message: friendlyError(err) }));
+        setState((s) => ({ ...s, step: 'error', message: friendlyError(err), failed: 'plan' }));
+      }
+    },
+    [childId, guestToken],
+  );
+
+  const generate = useCallback(
+    async (plan, prompt, language) => {
+      const id = ++latest.current;
+      setState((s) => ({ ...s, step: 'saving' }));
+      try {
+        const data = await apiRequest('/projects/generate', {
+          method: 'POST',
+          body: { plan, ...(prompt && { prompt }), language },
+          childId,
+          guestToken,
+        });
+        if (id !== latest.current) return;
+        setState((s) => ({ ...s, step: 'saved', saved: data, isMock: data.isMock ?? s.isMock }));
+      } catch (err) {
+        if (id !== latest.current) return;
+        setState((s) => ({ ...s, step: 'error', message: saveError(err), failed: 'generate' }));
       }
     },
     [childId, guestToken],
@@ -74,11 +104,15 @@ export function usePromptStudio({
 
   return {
     ...state,
+    generate: () => generate(state.plan, state.prompt, state.language),
     setPrompt: (prompt) => setState((s) => ({ ...s, prompt })),
     setLanguage: (language) => setState((s) => ({ ...s, language })),
     submit: () => run(state.prompt, state.language, []),
     answer: (text) => run(state.prompt, state.language, [...state.answers, text]),
-    retry: () => run(state.prompt, state.language, state.answers),
+    retry: () =>
+      state.failed === 'generate'
+        ? generate(state.plan, state.prompt, state.language)
+        : run(state.prompt, state.language, state.answers),
     edit: () => {
       latest.current += 1;
       setState((s) => ({ ...s, step: 'writing', answers: [], plan: null, notice: '' }));

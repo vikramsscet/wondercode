@@ -40,11 +40,22 @@ const PLAN = {
   learningConcepts: ['Conditions'],
   childSummary: l('You will make a quiz.'),
 };
+const SAVED = {
+  project: { id: 'p9', title: 'My Quiz' },
+  version: { versionNumber: 1 },
+  files: ['index.html', 'style.css', 'script.js'].map((path) => ({ path })),
+  validated: false,
+  isMock: true,
+};
 const reply = (status, body) => ({ ok: status < 400, status, json: async () => body });
 const ok = (data) => reply(200, { success: true, data });
 
 // `planReplies`: queue of responses for POST /prompts/plan.
+const generates = [];
+const generateReplies = [];
 function fakeApi(planReplies) {
+  generates.length = 0;
+  generateReplies.length = 0;
   const plans = [];
   const queue = [...planReplies];
   vi.stubGlobal(
@@ -62,6 +73,12 @@ function fakeApi(planReplies) {
             limits: {},
           },
         });
+      }
+      if (url.endsWith('/projects/generate')) {
+        generates.push({ headers: init.headers, body: JSON.parse(init.body) });
+        const next = generateReplies.shift();
+        if (next instanceof Error) throw next;
+        return next ?? ok(SAVED);
       }
       if (url.endsWith('/prompts/plan')) {
         plans.push({ headers: init.headers, body: JSON.parse(init.body) });
@@ -183,12 +200,49 @@ describe('Prompt Studio', () => {
     expect(await screen.findByRole('heading', { name: 'Here is your plan' })).toBeInTheDocument();
   });
 
-  it('says building is not ready yet when "Looks good!" is pressed', async () => {
+  it('saves the project when "Looks good!" is pressed and says opening it comes later', async () => {
     await asChild([ok({ status: 'ok', plan: PLAN, isMock: true })]);
     await type('a quiz about space');
     await submit();
     await userEvent.click(await screen.findByRole('button', { name: 'Looks good!' }));
-    expect(screen.getByRole('status')).toHaveTextContent('not ready yet');
+    expect(await screen.findByRole('heading', { name: 'Your project is saved!' })).toHaveFocus();
+    expect(screen.getByText('script.js')).toBeInTheDocument();
+    expect(screen.getByText('Sample code')).toBeInTheDocument();
+    expect(screen.getByText(/not ready yet/)).toBeInTheDocument();
+    expect(generates[0].headers['X-Child-Id']).toBe('c1');
+    expect(generates[0].body).toMatchObject({ plan: PLAN, prompt: 'a quiz about space' });
+  });
+
+  it('shows a friendly error if saving fails and retries the save, not the plan', async () => {
+    await asChild([ok({ status: 'ok', plan: PLAN, isMock: true })]);
+    generateReplies.push(new TypeError('network'));
+    await type('a quiz about space');
+    await submit();
+    await userEvent.click(await screen.findByRole('button', { name: 'Looks good!' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent("couldn't build your project");
+    await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
+    expect(
+      await screen.findByRole('heading', { name: 'Your project is saved!' }),
+    ).toBeInTheDocument();
+    expect(generates).toHaveLength(2);
+  });
+
+  it('shows the project-limit message for guests', async () => {
+    fakeApi([ok({ status: 'ok', plan: PLAN, isMock: true })]);
+    generateReplies.push(
+      reply(409, {
+        success: false,
+        error: { code: 'GUEST_LIMIT_REACHED', message: 'Guests can make a few projects.' },
+      }),
+    );
+    renderAt('/');
+    await userEvent.click(screen.getByRole('button', { name: 'Try as Guest' }));
+    await userEvent.click(await screen.findByRole('link', { name: 'Start creating' }));
+    await type('a quiz about space');
+    await submit();
+    await userEvent.click(await screen.findByRole('button', { name: 'Looks good!' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Guests can make a few projects.');
+    expect(generates[0].headers['X-Guest-Token']).toBe('gtok');
   });
 
   it('pre-fills the prompt from a dashboard idea card', async () => {
