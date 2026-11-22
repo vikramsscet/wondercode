@@ -1,85 +1,63 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 import { Alert, Button } from '../../components/ui/index.js';
-import { buildPreviewDocument } from './preview/buildPreviewDocument.js';
-import {
-  HEARTBEAT_TIMEOUT_MS,
-  MAX_LOG_LINES,
-  MAX_MESSAGES,
-  acceptMessage,
-  newNonce,
-} from './preview/previewProtocol.js';
+import { usePreviewRunner } from './preview/usePreviewRunner.js';
 
-// Runs the project inside a sandboxed iframe (opaque origin, strict CSP). It only starts when
-// the child presses Run, and it runs a snapshot, so what is shown is exactly what was run.
-// Stop/Restart and richer states come in Prompt 23.
-export default function PreviewPane({ files }) {
-  const [run, setRun] = useState(null); // { nonce, srcDoc }
-  const [logs, setLogs] = useState([]);
-  const [problem, setProblem] = useState(null); // error | blocked | unresponsive | missing
+const STATUS_TEXT = {
+  idle: 'Ready when you are',
+  starting: 'Starting…',
+  running: 'Running',
+  stopped: 'Stopped',
+};
+
+const PROBLEMS = {
+  blocked: () => "Your project tried to reach the internet, which isn't allowed here.",
+  missing: () => "We couldn't find index.html, so there is nothing to show yet.",
+  error: (p) => `Your code hit a problem: ${p.message}`,
+  unresponsive: () =>
+    "Your project stopped because it wasn't responding. Check for a loop that never ends.",
+  startTimeout: () => 'Your project took too long to start, so we stopped it. Try Run again.',
+  timeLimit: () => 'We stopped your project to save energy. Press Run to start it again.',
+};
+
+// Runs the project in a sandboxed iframe (see preview/ and docs/ui/preview.md). It only starts
+// when the child presses Run or Restart, and runs a snapshot of the files at that moment.
+export default function PreviewPane({ files, onStart }) {
   const frameRef = useRef(null);
-  const lastBeat = useRef(0);
-  const count = useRef(0);
-
-  const start = () => {
-    const nonce = newNonce();
-    const srcDoc = buildPreviewDocument(files, nonce);
-    setLogs([]);
-    count.current = 0;
-    if (!srcDoc) {
-      setRun(null);
-      setProblem({ kind: 'missing' });
-      return;
-    }
-    lastBeat.current = Date.now();
-    setProblem(null);
-    setRun({ nonce, srcDoc });
+  const r = usePreviewRunner(files, frameRef);
+  const live = r.status === 'starting' || r.status === 'running';
+  const go = () => {
+    onStart?.();
+    r.start();
   };
-
-  useEffect(() => {
-    if (!run) return undefined;
-    const onMessage = (event) => {
-      const msg = acceptMessage(event, frameRef.current?.contentWindow, run.nonce);
-      if (!msg || ++count.current > MAX_MESSAGES) return;
-      lastBeat.current = Date.now();
-      if (msg.type === 'log') {
-        setLogs((prev) => [...prev, msg].slice(-MAX_LOG_LINES));
-      } else if (msg.type === 'error') {
-        setProblem({ kind: 'error', message: msg.message });
-      } else if (msg.type === 'blocked') {
-        setProblem({ kind: 'blocked' });
-      }
-    };
-    window.addEventListener('message', onMessage);
-    // If the page stops reporting in, take it away.
-    const watchdog = setInterval(() => {
-      if (Date.now() - lastBeat.current > HEARTBEAT_TIMEOUT_MS) {
-        setRun(null);
-        setProblem({ kind: 'unresponsive' });
-      }
-    }, 1000);
-    return () => {
-      window.removeEventListener('message', onMessage);
-      clearInterval(watchdog);
-    };
-  }, [run]);
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between gap-2 border-b border-ink-200 px-4 py-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-ink-200 px-4 py-2">
         <h2 className="font-extrabold">Preview</h2>
-        <Button size="sm" onClick={start}>
-          {run ? 'Run again' : 'Run'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <span aria-live="polite" className="mr-1 text-sm font-bold text-ink-600">
+            {STATUS_TEXT[r.status]}
+          </span>
+          <Button size="sm" onClick={go} disabled={live}>
+            Run
+          </Button>
+          <Button size="sm" variant="outline" onClick={r.stop} disabled={!live}>
+            Stop
+          </Button>
+          <Button size="sm" variant="outline" onClick={go} disabled={r.status === 'idle'}>
+            Restart
+          </Button>
+        </div>
       </div>
       <div className="flex min-h-48 flex-1 flex-col bg-white">
-        {run ? (
+        {r.run ? (
           <iframe
-            key={run.nonce}
+            key={r.run.nonce}
             ref={frameRef}
             title="Project preview"
             sandbox="allow-scripts"
             referrerPolicy="no-referrer"
-            srcDoc={run.srcDoc}
+            srcDoc={r.run.srcDoc}
             className="w-full flex-1 border-0"
           />
         ) : (
@@ -87,45 +65,47 @@ export default function PreviewPane({ files }) {
             <span className="text-5xl" aria-hidden="true">
               🚀
             </span>
-            <p className="text-lg font-bold">Press Run to see your project</p>
+            <p className="text-lg font-bold">
+              {r.status === 'stopped' ? 'Your project is stopped' : 'Press Run to see your project'}
+            </p>
             <p className="text-ink-600">Nothing runs until you press Run.</p>
           </div>
         )}
       </div>
-      {problem && <ProblemAlert problem={problem} />}
-      {logs.length > 0 && (
+      {r.changed && live && (
+        <Alert tone="info" className="m-3 mb-0">
+          Your code has changed since this run. Press Restart to see the new version.
+        </Alert>
+      )}
+      {r.problem && (
+        <Alert
+          tone={['info'].includes(r.problem.kind) ? 'info' : 'warning'}
+          className="m-3"
+          key={r.problem.kind}
+        >
+          {PROBLEMS[r.problem.kind](r.problem)}
+        </Alert>
+      )}
+      {r.logs.length > 0 && (
         <section
           aria-label="Messages"
           className="max-h-32 overflow-auto border-t border-ink-200 p-3"
         >
           <h3 className="text-sm font-extrabold">Messages from your project</h3>
           <ul className="font-mono text-sm">
-            {logs.map((l, i) => (
+            {r.logs.map((l, i) => (
               <li key={i} className={l.level === 'error' ? 'text-coral-700' : undefined}>
                 {l.text}
+                {l.count > 1 && ` (×${l.count})`}
               </li>
             ))}
           </ul>
+          {r.hidden && <p className="mt-1 text-sm text-ink-600">Some messages were hidden.</p>}
         </section>
       )}
+      {r.hidden && r.logs.length === 0 && (
+        <p className="p-3 text-sm text-ink-600">Some messages were hidden.</p>
+      )}
     </div>
-  );
-}
-
-function ProblemAlert({ problem }) {
-  const text = {
-    error: `Your code hit a problem: ${problem.message}`,
-    blocked: "Your project tried to reach the internet, which isn't allowed here.",
-    unresponsive:
-      "Your project stopped because it wasn't responding. Check for a loop that never ends.",
-    missing: "We couldn't find index.html, so there is nothing to show yet.",
-  }[problem.kind];
-  return (
-    <Alert
-      tone={problem.kind === 'error' || problem.kind === 'unresponsive' ? 'warning' : 'info'}
-      className="m-3"
-    >
-      {text}
-    </Alert>
   );
 }

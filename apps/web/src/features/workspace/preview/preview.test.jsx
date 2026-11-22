@@ -111,7 +111,7 @@ describe('PreviewPane', () => {
     const frame = screen.getByTitle('Project preview');
     expect(frame.getAttribute('sandbox')).toBe('allow-scripts');
     expect(frame.getAttribute('srcdoc')).toContain(PREVIEW_CSP);
-    expect(screen.getByRole('button', { name: 'Run again' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Restart' })).toBeEnabled();
   });
 
   it('runs a snapshot: later edits do not change a running preview', async () => {
@@ -155,7 +155,7 @@ describe('PreviewPane', () => {
     expect(screen.getByRole('status')).toHaveTextContent("isn't allowed here");
   });
 
-  it('removes a frame that stops reporting in', async () => {
+  it('stops a frame that never says it is ready', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     render(<PreviewPane files={FILES} />);
     await userEvent.click(screen.getByRole('button', { name: 'Run' }));
@@ -163,7 +163,7 @@ describe('PreviewPane', () => {
       await vi.advanceTimersByTimeAsync(7000);
     });
     expect(screen.queryByTitle('Project preview')).not.toBeInTheDocument();
-    expect(screen.getByRole('status')).toHaveTextContent("wasn't responding");
+    expect(screen.getByRole('status')).toHaveTextContent('took too long to start');
     vi.useRealTimers();
   });
 });

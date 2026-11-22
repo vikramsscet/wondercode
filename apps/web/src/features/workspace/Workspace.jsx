@@ -103,6 +103,7 @@ export default function Workspace({ files, title }) {
               path: f.path,
               content: edits[f.path] ?? f.content,
             }))}
+            onStart={() => setTab('preview')}
           />
         </div>
       </div>
