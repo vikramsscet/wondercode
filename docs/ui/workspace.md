@@ -10,7 +10,8 @@ Layout shell for viewing a project's files. Code lives in `apps/web/src/features
 ## Components
 - `Workspace` takes `files` (`[{path, content}]`) and `title`; with no `files` it uses `mockProject.js`.
 - `FileExplorer`: file list, icon per type, `aria-current` on the active file, Up/Down/Home/End keys.
-- `EditorPane`: **placeholder**, read-only code with line numbers in a `<pre>`. Monaco replaces it in Prompt 21.
+- `EditorPane`: wraps the Monaco editor (Prompt 21), lazy-loaded, with a status line showing the selected lines and a "Changed, not saved" marker.
+- `MonacoEditor`: Monaco bundled locally (no CDN), HTML/CSS/JS highlighting, line numbers, no minimap, word wrap, 16px font. One model per file path, so undo history and cursor survive file switching. Language services (validation, suggestions) are not loaded.
 - `PreviewPane`: **placeholder**, runs nothing. The sandboxed iframe arrives in Prompt 22.
 
 ## Responsive behaviour
@@ -18,5 +19,13 @@ Layout shell for viewing a project's files. Code lives in `apps/web/src/features
 - Below `lg`: a tab bar (Files, Code, Preview) shows one pane at a time. All panes stay mounted, so state is kept.
 - Choosing a file on a small screen jumps to the Code tab.
 
+## Editing and line tracking
+- `Workspace` keeps edits per path in memory (`edits`); the original file contents are never modified. A file is "changed" while its text differs from the original.
+- Edits are lost on reload. Saving and unsaved-edit recovery are Prompt 24.
+- The selection (`{path, startLine, endLine}`, line numbers only, never code) is held in `Workspace` state for the explanations in Prompt 25.
+
+## Testing note
+Monaco needs a real browser, so unit tests replace `MonacoEditor` with a textarea that has the same props. The real editor is covered by the build, not by unit tests; check it by hand with `npm run dev:web` at `/workspace`.
+
 ## Not included
-Resizable panes, editing, running code, loading real projects.
+Resizable panes, saving, running code, loading real projects.

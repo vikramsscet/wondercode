@@ -19,6 +19,8 @@ export default function Workspace({ files, title }) {
   const project = sample ? MOCK_PROJECT : { title, files };
   const [activePath, setActivePath] = useState(project.files[0]?.path);
   const [tab, setTab] = useState('code');
+  const [edits, setEdits] = useState({}); // path -> edited text; the originals are never changed
+  const [selection, setSelection] = useState(null); // { path, startLine, endLine }, line numbers only
   const file = project.files.find((f) => f.path === activePath);
   const show = (id) => (tab === id ? 'block' : 'hidden lg:block');
   const select = (path) => {
@@ -71,7 +73,21 @@ export default function Workspace({ files, title }) {
             show('code'),
           )}
         >
-          <EditorPane file={file} />
+          <EditorPane
+            file={file}
+            value={file ? (edits[file.path] ?? file.content) : ''}
+            dirty={Boolean(file) && file.path in edits}
+            selection={selection}
+            onChange={(text) =>
+              setEdits((prev) => {
+                const next = { ...prev };
+                if (text === file.content) delete next[file.path];
+                else next[file.path] = text;
+                return next;
+              })
+            }
+            onSelection={setSelection}
+          />
         </div>
         <div
           id="pane-preview"
