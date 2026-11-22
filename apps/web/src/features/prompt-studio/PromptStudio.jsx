@@ -1,5 +1,14 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { Alert, Badge, Button, Card, Spinner, TextField } from '../../components/ui/index.js';
+import { Link, useLocation } from 'react-router-dom';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  buttonClasses,
+  Spinner,
+  TextField,
+} from '../../components/ui/index.js';
 import { cn } from '../../utils/cn.js';
 import { LANGUAGES, PROMPT_MAX, examplePrompts, starterCards } from './promptStudioData.js';
 import { usePromptStudio } from './usePromptStudio.js';
@@ -139,6 +148,7 @@ const SavingStep = () => <ThinkingStep message="Building your project…" />;
 
 function SavedStep({ studio }) {
   const { saved } = studio;
+  const inTrial = useLocation().pathname.startsWith('/try');
   return (
     <div>
       <StepHeading>Your project is saved!</StepHeading>
@@ -163,9 +173,15 @@ function SavedStep({ studio }) {
         It has not been run yet.
       </Alert>
       <Alert tone="info" className="mt-4">
-        Opening your project to see it and change it comes next, and it is not ready yet. Your files
-        are safe.
+        Seeing and changing your own project is coming soon. Your files are safe. You can look
+        around the workspace with sample files.
       </Alert>
+      <Link
+        to={inTrial ? '/try/workspace' : '/workspace'}
+        className={buttonClasses({ size: 'lg', className: 'mr-3 mt-6' })}
+      >
+        Open workspace
+      </Link>
       <Button className="mt-6" variant="outline" size="lg" onClick={studio.edit}>
         Make another project
       </Button>

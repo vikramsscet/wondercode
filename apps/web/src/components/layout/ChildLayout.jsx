@@ -1,4 +1,4 @@
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import ErrorBoundary from '../common/ErrorBoundary.jsx';
 import { Button } from '../ui/index.js';
 import Avatar from '../../features/child-profile/Avatar.jsx';
@@ -9,6 +9,7 @@ import { useChildProfiles } from '../../features/child-profile/ChildProfilesCont
 export default function ChildLayout() {
   const { active } = useChildProfiles();
   const navigate = useNavigate();
+  const wide = useLocation().pathname.startsWith('/workspace'); // the workspace needs more room
   return (
     <div className="flex min-h-screen flex-col">
       <header className="border-b border-ink-200 bg-white">
@@ -27,7 +28,9 @@ export default function ChildLayout() {
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
+      <main
+        className={`mx-auto w-full ${wide ? 'max-w-7xl' : 'max-w-5xl'} flex-1 px-4 py-8 sm:px-6 sm:py-10`}
+      >
         <ErrorBoundary>
           <Outlet />
         </ErrorBoundary>

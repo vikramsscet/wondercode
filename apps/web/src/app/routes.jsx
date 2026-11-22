@@ -19,6 +19,7 @@ import ChildRoute from '../features/child-profile/ChildRoute.jsx';
 import DashboardPage from '../pages/DashboardPage.jsx';
 import { ChildCreatePage, GuestCreatePage } from '../pages/CreatePage.jsx';
 import ProfilePickerPage from '../pages/ProfilePickerPage.jsx';
+import WorkspacePage from '../pages/WorkspacePage.jsx';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
 
 // The style guide is only available in development builds.
@@ -34,6 +35,7 @@ export const routes = [
         children: [
           { path: '/dashboard', element: <DashboardPage /> },
           { path: '/create', element: <ChildCreatePage /> },
+          { path: '/workspace', element: <WorkspacePage /> },
         ],
       },
     ],
@@ -50,6 +52,7 @@ export const routes = [
         children: [
           { path: '/try', element: <GuestHomePage /> },
           { path: '/try/create', element: <GuestCreatePage /> },
+          { path: '/try/workspace', element: <WorkspacePage /> },
         ],
       },
       {

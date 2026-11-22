@@ -209,7 +209,10 @@ describe('Prompt Studio', () => {
     expect(await screen.findByRole('heading', { name: 'Your project is saved!' })).toHaveFocus();
     expect(screen.getByText('script.js')).toBeInTheDocument();
     expect(screen.getByText('Sample code')).toBeInTheDocument();
-    expect(screen.getByText(/not ready yet/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Open workspace' })).toHaveAttribute(
+      'href',
+      '/workspace',
+    );
     expect(screen.getByText(/It has not been run yet/)).toBeInTheDocument();
     expect(screen.getByText(/1 tip to share/)).toBeInTheDocument();
     expect(generates[0].headers['X-Child-Id']).toBe('c1');
@@ -271,6 +274,21 @@ describe('Prompt Studio', () => {
     expect(plans[0].headers['X-Guest-Token']).toBe('gtok');
     expect(plans[0].headers).not.toHaveProperty('X-Child-Id');
     expect(plans[0].headers).not.toHaveProperty('Authorization');
+  });
+
+  it('serves the workspace to a child and a guest, with sample files', async () => {
+    mocks.user = { id: 'p1', email: 'p@example.com' };
+    window.sessionStorage.setItem('wondercode.activeChild', 'c1');
+    fakeApi([]);
+    renderAt('/workspace');
+    expect(await screen.findByRole('heading', { level: 1, name: /Sample/ })).toBeInTheDocument();
+    expect(screen.getByLabelText('Code of index.html')).toBeInTheDocument();
+  });
+
+  it('keeps the workspace behind the guest session', async () => {
+    fakeApi([]);
+    const router = renderAt('/try/workspace');
+    await waitFor(() => expect(router.state.location.pathname).toBe('/'));
   });
 
   it('does not keep the prompt in browser storage', async () => {
