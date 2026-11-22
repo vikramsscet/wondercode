@@ -3,17 +3,17 @@
 _Last updated: 2026-11-21._ The roadmap is the 42 prompts in `WonderCode_Product_and_Technical_Blueprint_README.md` (section 11).
 
 ## Where we are
-**Completed: Prompts 01 to 15 (15 of 42).** Next: **Prompt 16, Project planning.** Prompt 15 awaits approval.
+**Completed: Prompts 01 to 16 (16 of 42).** Next: **Prompt 17, Prompt Studio UI.** Prompt 16 awaits approval. Prompts 14 and 15 are approved and pushed (commit `d617c07`).
 
 | Phase | Prompts | Status |
 |---|---|---|
 | A. Foundation | 01 to 05 | Done |
 | B. Data and identity | 06 to 09 | Done (schema applied to `wondercode-dev`) |
 | C. Design and navigation | 10 to 13 | Done |
-| D. AI creation | 14, 15 | 14 and 15 done (mock provider, rule-based safety); 16 to 19 not started |
+| D. AI creation | 14 to 16 | 14, 15 approved; 16 (planning) done, awaiting approval; 17 to 19 not started |
 | E to H | 20 to 42 | Not started |
 
-Prompts 14 and 15 are finished but not yet explicitly approved by the product owner.
+Prompt 16 is finished but not yet approved.
 
 ## How to resume tomorrow
 1. Open the repo: `/Users/vikram.rao/testApp/wondercode`.
@@ -21,7 +21,7 @@ Prompts 14 and 15 are finished but not yet explicitly approved by the product ow
 3. Check the project still works:
    ```
    npm install
-   npm test            # expect 112 API + 63 web tests passing
+   npm test            # expect 126 API + 63 web tests passing
    npm run lint
    npm run dev:api     # http://localhost:3000/api/v1/health
    npm run dev:web     # http://localhost:5173   (style guide at /design)
@@ -35,7 +35,7 @@ Prompts 14 and 15 are finished but not yet explicitly approved by the product ow
 - Never commit secrets. The service-role key stays in `apps/api/.env` only.
 
 ## Things to know
-- **Git:** Prompts 02 to 14 are committed and pushed to `origin/main` (commit `19c1d8a`, "ai provider abstraction"). Commit and push after each approved prompt, and check `git status` shows no `.env` files first.
+- **Git:** Prompts 02 to 15 are committed and pushed to `origin/main` (latest commit `d617c07`, "prompt safety and understanding"). Commit and push after each approved prompt, and check `git status` shows no `.env` files first.
 - **Never put real keys in `.env.example`.** Real values belong only in the git-ignored `.env` files.
 - Supabase project is the dev one only; production is not configured. Migrations were applied by pasting SQL in the dashboard.
 - Mock AI is the only provider; real providers are deferred (ADR 0002, `docs/ai/provider-architecture.md`).
@@ -53,7 +53,6 @@ Prompts 14 and 15 are finished but not yet explicitly approved by the product ow
 - Prompt moderation is rule-based only (ADR 0014); word lists need educator review and a real moderation model. Code validation (19), quotas and rate limits (37), observability (40) and the security and privacy review (38) are still to do. Legal review of child-privacy consent is needed before any public launch.
 
 ## Upcoming prompts, one line each
-- 16 Project planning: structured, age-appropriate plan with English, Hindi and Hinglish summaries.
 - 17 Prompt Studio UI: prompt input, examples, starter cards, plan review, connected to the planning API.
 - 18 Generation: `index.html`, `style.css`, `script.js` under strict limits, saved as a new version.
 - 19 Code validation: paths, types, sizes, syntax and disallowed capabilities, no server execution.

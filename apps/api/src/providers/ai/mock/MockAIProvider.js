@@ -3,6 +3,7 @@ import { AIProvider } from '../AIProvider.js';
 import {
   COLOURS,
   CONCEPTS,
+  PLAN_DETAILS,
   TEMPLATES,
   detectConcept,
   detectType,
@@ -27,13 +28,16 @@ export class MockAIProvider extends AIProvider {
   isMock = true;
 
   async generateProjectPlan(input) {
-    const template = TEMPLATES[detectType(input.prompt)];
+    const type = detectType(input.prompt);
+    const template = TEMPLATES[type];
     return done(
       {
         title: template.title,
         description: template.description,
-        projectType: detectType(input.prompt),
+        projectType: type,
         features: template.features,
+        interaction: PLAN_DETAILS[type].interaction,
+        expectedBehaviour: PLAN_DETAILS[type].expectedBehaviour,
         files: Object.keys(template.files),
         learningConcepts: template.concepts,
         childSummary: template.summary,

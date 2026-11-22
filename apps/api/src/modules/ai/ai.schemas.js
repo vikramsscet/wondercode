@@ -23,6 +23,8 @@ export const projectPlan = z.object({
   description: text(300),
   projectType: z.enum(PROJECT_TYPES),
   features: z.array(text(120)).min(1).max(8),
+  interaction: z.array(localized(160)).min(1).max(3), // how the child uses the project
+  expectedBehaviour: z.array(localized(160)).min(1).max(5), // what happens when they do
   files: z.array(filePath).min(1).max(10),
   learningConcepts: z.array(text(60)).min(1).max(10),
   childSummary: localized(300),
@@ -64,7 +66,15 @@ export const teacherAnswer = z.object({
 });
 
 // ----- inputs (what callers pass to AIService) -----
-export const planInput = z.object({ prompt: text(500), language: language.default('en') }).strict();
+export const planInput = z
+  .object({
+    prompt: text(500),
+    language: language.default('en'),
+    // Optional personalisation, only passed for child profiles (never free-text about the child).
+    age: z.number().int().min(8).max(12).optional(),
+    interests: z.array(text(30)).max(5).optional(),
+  })
+  .strict();
 
 export const codeInput = z.object({ plan: projectPlan, language: language.default('en') }).strict();
 

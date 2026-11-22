@@ -48,6 +48,7 @@ The service-role key and AI keys must never appear in frontend code or `VITE_*` 
 | 11 Landing and onboarding | Done, awaiting review |
 | 12 Child dashboard (with profile picker, header avatar, switching) | Done, awaiting review |
 | 13 Parent dashboard shell | Done, awaiting review |
-| 14 AI provider abstraction (mock) | Done, awaiting review |
-| 15 Prompt safety and understanding (`POST /prompts/analyze`) | Done, awaiting review |
-| 16 onward | Not started |
+| 14 AI provider abstraction (mock) | Done, approved |
+| 15 Prompt safety and understanding (`POST /prompts/analyze`) | Done, approved |
+| 16 Project planning (`POST /prompts/plan`) | Done, awaiting review |
+| 17 onward | Not started |

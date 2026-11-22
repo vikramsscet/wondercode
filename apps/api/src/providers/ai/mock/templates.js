@@ -494,3 +494,74 @@ export const COLOURS = {
   hara: '#22c55e',
   peela: '#facc15',
 };
+
+const l = (en, hi, hinglish) => ({ en, hi, hinglish });
+
+// How the child uses each sample project, and what happens when they do (used in project plans).
+export const PLAN_DETAILS = {
+  game: {
+    interaction: [
+      l(
+        'Press the left and right arrow keys or buttons.',
+        'बाएँ और दाएँ तीर वाली कुंजियाँ या बटन दबाओ।',
+        'Left aur right arrow keys ya buttons dabao.',
+      ),
+    ],
+    expectedBehaviour: [
+      l('The basket moves.', 'टोकरी चलती है।', 'Basket move karti hai.'),
+      l(
+        'Catching a star adds one point.',
+        'सितारा पकड़ने पर एक अंक मिलता है।',
+        'Star pakadne par ek point milta hai.',
+      ),
+    ],
+  },
+  quiz: {
+    interaction: [l('Click an answer.', 'एक जवाब पर क्लिक करो।', 'Ek answer par click karo.')],
+    expectedBehaviour: [
+      l(
+        'The quiz says if you are right.',
+        'क्विज़ बताता है कि जवाब सही है या नहीं।',
+        'Quiz batata hai ki answer sahi hai ya nahi.',
+      ),
+      l(
+        'At the end you see your score.',
+        'आखिर में तुम्हारा स्कोर दिखता है।',
+        'End mein tumhara score dikhta hai.',
+      ),
+    ],
+  },
+  calculator: {
+    interaction: [
+      l(
+        'Type two numbers and pick an operation.',
+        'दो संख्याएँ लिखो और एक क्रिया चुनो।',
+        'Do numbers type karo aur ek operation chuno.',
+      ),
+    ],
+    expectedBehaviour: [
+      l('The answer appears on the page.', 'जवाब पेज पर दिखता है।', 'Answer page par dikhta hai.'),
+    ],
+  },
+  animation: {
+    interaction: [l('Click the shape.', 'आकृति पर क्लिक करो।', 'Shape par click karo.')],
+    expectedBehaviour: [
+      l('The shape moves by itself.', 'आकृति अपने आप चलती है।', 'Shape apne aap move karti hai.'),
+      l(
+        'Clicking changes its colour.',
+        'क्लिक करने पर रंग बदलता है।',
+        'Click karne par colour badalta hai.',
+      ),
+    ],
+  },
+  webpage: {
+    interaction: [l('Click the button.', 'बटन पर क्लिक करो।', 'Button par click karo.')],
+    expectedBehaviour: [
+      l(
+        'The message on the page changes.',
+        'पेज का संदेश बदल जाता है।',
+        'Page ka message badal jata hai.',
+      ),
+    ],
+  },
+};

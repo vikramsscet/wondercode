@@ -9,3 +9,12 @@ export const analyzeBody = z
     language: z.enum(EXPLANATION_LANGUAGES).optional(),
   })
   .strict();
+
+// Planning takes the same body plus up to two answers to earlier clarifying questions.
+export const planBody = z
+  .object({
+    prompt: z.string().max(PROMPT_MAX * 2),
+    language: z.enum(EXPLANATION_LANGUAGES).optional(),
+    answers: z.array(z.string().max(200)).max(2).optional(),
+  })
+  .strict();
