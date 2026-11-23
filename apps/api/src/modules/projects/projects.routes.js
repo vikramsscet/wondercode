@@ -4,6 +4,8 @@ import { validate } from '../../middleware/validate.js';
 import { sendSuccess } from '../../utils/response.js';
 import { generateBody, projectIdParams, validateBody } from './projects.schemas.js';
 import * as service from './projects.service.js';
+import { explainBody, listQuery } from '../explanations/explanations.schemas.js';
+import * as explanations from '../explanations/explanations.service.js';
 
 // Mounted at /projects. Children (parent JWT + X-Child-Id) and guests (X-Guest-Token) share these routes.
 export function createProjectsRouter(config) {
@@ -48,6 +50,44 @@ export function createProjectsRouter(config) {
       next(err);
     }
   });
+
+  router.post(
+    '/:projectId/explanations',
+    validate({ params: projectIdParams, body: explainBody }),
+    async (req, res, next) => {
+      try {
+        const { projectId } = req.validated.params;
+        sendSuccess(
+          req,
+          res,
+          await explanations.explainLines(ctx(req), req.owner, projectId, req.validated.body),
+        );
+      } catch (err) {
+        next(err);
+      }
+    },
+  );
+
+  router.get(
+    '/:projectId/explanations',
+    validate({ params: projectIdParams, query: listQuery }),
+    async (req, res, next) => {
+      try {
+        sendSuccess(
+          req,
+          res,
+          await explanations.listForProject(
+            ctx(req),
+            req.owner,
+            req.validated.params.projectId,
+            req.validated.query.versionId,
+          ),
+        );
+      } catch (err) {
+        next(err);
+      }
+    },
+  );
 
   return router;
 }

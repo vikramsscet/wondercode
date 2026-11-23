@@ -11,7 +11,14 @@ export default function WorkspacePage() {
   return <Workspace />;
 }
 
-function ProjectWorkspace({ projectId, ownerId, childId, guestToken, createPath }) {
+function ProjectWorkspace({
+  projectId,
+  ownerId,
+  childId,
+  guestToken,
+  createPath,
+  defaultLanguage,
+}) {
   const { status, project, reload } = useProject(projectId, { childId, guestToken });
   if (status === 'loading') return <LoadingState message="Opening your project…" />;
   if (status === 'notfound') {
@@ -42,6 +49,7 @@ function ProjectWorkspace({ projectId, ownerId, childId, guestToken, createPath 
       version={project.version.versionNumber}
       checked={project.validated}
       draftKey={draftKey(ownerId, projectId, project.version.id)}
+      explain={{ projectId, versionId: project.version.id, childId, guestToken, defaultLanguage }}
     />
   );
 }
@@ -57,6 +65,7 @@ export function ChildProjectPage() {
       ownerId={active.id}
       childId={active.id}
       createPath="/create"
+      defaultLanguage={active.explanationLanguage ?? 'en'}
     />
   );
 }

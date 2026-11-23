@@ -18,7 +18,7 @@ Migrations: `supabase/migrations/` (apply in filename order; see [supabase-setup
 | `learning_progress` | Per child and concept: mastery status and evidence count. |
 | `usage_events` | Append-only quota accounting for a child or guest. `metadata` must never contain prompts or child content. |
 
-AI tables (`ai_interactions`, `code_explanations`, `teacher_conversations`, `teacher_messages`) are created with their features (Prompts 14, 25, 27). They must carry `child_profile_id` (or `guest_session_id`) like the other child-owned tables.
+`code_explanations` (Prompt 25, migration `20261122000007`): immutable explanation per version, file, line range, code hash and language; one owner (child or guest); RLS with a parent-read policy. Other AI tables (`ai_interactions`, `teacher_conversations`, `teacher_messages`) are created with their features (Prompts 14, 27). They must carry `child_profile_id` (or `guest_session_id`) like the other child-owned tables.
 
 ## Isolation model
 - Every child-owned table references `child_profiles` with `ON DELETE CASCADE`, so deleting a child removes all of that child's data.

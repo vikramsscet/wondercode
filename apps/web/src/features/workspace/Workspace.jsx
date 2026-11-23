@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Alert, Badge, Button } from '../../components/ui/index.js';
 import { cn } from '../../utils/cn.js';
 import { clearDraft, loadDraft, saveDraft } from './drafts.js';
+import ExplainPanel from './ExplainPanel.jsx';
 import EditorPane from './EditorPane.jsx';
 import FileExplorer from './FileExplorer.jsx';
 import { MOCK_PROJECT } from './mockProject.js';
@@ -15,7 +16,7 @@ const TABS = [
 
 // Three panes: files | code | preview. From the lg breakpoint they sit side by side; on smaller
 // screens a tab bar shows one at a time (all stay mounted so nothing resets when switching).
-export default function Workspace({ files, title, version, checked, draftKey }) {
+export default function Workspace({ files, title, version, checked, draftKey, explain }) {
   const sample = !files;
   const project = sample ? MOCK_PROJECT : { title, files };
   const [activePath, setActivePath] = useState(project.files[0]?.path);
@@ -171,6 +172,12 @@ export default function Workspace({ files, title, version, checked, draftKey }) 
           />
         </div>
       </div>
+      <ExplainPanel
+        explain={explain}
+        file={file}
+        edited={Boolean(file) && file.path in edits}
+        selection={selection}
+      />
     </section>
   );
 }

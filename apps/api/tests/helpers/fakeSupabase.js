@@ -11,6 +11,7 @@ export function createFakeSupabase({ users = {}, tables = {}, failInsert, failUp
     usage_events: [],
     project_versions: [],
     project_files: [],
+    code_explanations: [],
     ...tables,
   };
   let seq = 0;
