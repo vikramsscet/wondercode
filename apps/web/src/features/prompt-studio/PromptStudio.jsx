@@ -172,12 +172,8 @@ function SavedStep({ studio }) {
           `We have ${saved.validation.warnings.length} tip${saved.validation.warnings.length === 1 ? '' : 's'} to share later. `}
         It has not been run yet.
       </Alert>
-      <Alert tone="info" className="mt-4">
-        Seeing and changing your own project is coming soon. Your files are safe. You can look
-        around the workspace with sample files.
-      </Alert>
       <Link
-        to={inTrial ? '/try/workspace' : '/workspace'}
+        to={`${inTrial ? '/try/workspace' : '/workspace'}/${saved.project.id}`}
         className={buttonClasses({ size: 'lg', className: 'mr-3 mt-6' })}
       >
         Open workspace

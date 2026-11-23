@@ -3,9 +3,10 @@
 Layout shell for viewing a project's files. Code lives in `apps/web/src/features/workspace/`.
 
 ## Routes
-- `/workspace` (child, inside the child layout, wider container) and `/try/workspace` (guest).
-- Both show **sample files** (labelled "Sample") until generated project versions are loaded (Prompt 24).
-- The saved step of Prompt Studio links to the matching route ("Open workspace").
+- `/workspace` (child, wider layout) and `/try/workspace` (guest): **sample files**, labelled "Sample".
+- `/workspace/:projectId` and `/try/workspace/:projectId`: a saved project (Prompt 24). `useProject` calls `GET /projects/:id` with the child or guest credentials (the API checks ownership and file hashes and re-validates). States: loading, not found (link to make a new project), error (Try again).
+- The saved step of Prompt Studio links to `/workspace/<id>` or `/try/workspace/<id>`.
+- The title row shows "Version N, checked" ("checked" = parsed and statically validated, not run).
 
 ## Components
 - `Workspace` takes `files` (`[{path, content}]`) and `title`; with no `files` it uses `mockProject.js`.
@@ -21,8 +22,20 @@ Layout shell for viewing a project's files. Code lives in `apps/web/src/features
 
 ## Editing and line tracking
 - `Workspace` keeps edits per path in memory (`edits`); the original file contents are never modified. A file is "changed" while its text differs from the original.
-- Edits are lost on reload. Saving and unsaved-edit recovery are Prompt 24.
+- There is no server save yet (versions arrive with Prompt 29). Edits are protected locally instead, see below.
 - The selection (`{path, startLine, endLine}`, line numbers only, never code) is held in `Workspace` state for the explanations in Prompt 25.
+
+## Recovering unsaved edits (`drafts.js`)
+- Edits are saved (debounced 500 ms) to `localStorage` as a draft keyed by child/guest, project and version. Code only, never prompts.
+- On load, a draft is **offered, never applied silently**: "We found changes you hadn't saved" with Restore and Throw away.
+- Drafts are capped (400 KB total, 200 KB per file), expire after 14 days, and are validated on load: only known file paths, text content, and content that really differs from the saved version.
+- "Reset this file" and "Reset all changes" return to the saved version and remove the draft.
+- The browser asks before leaving the page only while edits exist.
+- Storage may be blocked or corrupt; every call is wrapped and failures are ignored.
+- On a shared computer another person could see a draft. The key includes the child's id, so other profiles do not get it.
+
+## Source shown = source run
+The preview runs a snapshot built from the same file list the editor holds (edited text, not the original). Editing after a run shows "Your code has changed since this run" until Restart.
 
 ## Testing note
 Monaco needs a real browser, so unit tests replace `MonacoEditor` with a textarea that has the same props. The real editor is covered by the build, not by unit tests; check it by hand with `npm run dev:web` at `/workspace`.

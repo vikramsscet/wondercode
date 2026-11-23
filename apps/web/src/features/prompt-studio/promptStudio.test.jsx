@@ -211,7 +211,7 @@ describe('Prompt Studio', () => {
     expect(screen.getByText('Sample code')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Open workspace' })).toHaveAttribute(
       'href',
-      '/workspace',
+      '/workspace/p9',
     );
     expect(screen.getByText(/It has not been run yet/)).toBeInTheDocument();
     expect(screen.getByText(/1 tip to share/)).toBeInTheDocument();

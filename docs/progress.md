@@ -3,7 +3,7 @@
 _Last updated: 2026-11-22._ The roadmap is the 42 prompts in `WonderCode_Product_and_Technical_Blueprint_README.md` (section 11).
 
 ## Where we are
-**Completed: Prompts 01 to 23 (23 of 42).** Next: **Prompt 24, Connect generation to the workspace.** Prompt 23 is pushed and awaits approval. Prompts 01 to 22 are approved and pushed.
+**Completed: Prompts 01 to 24 (24 of 42).** Next: **Prompt 25, Versioned code explanations.** Prompts 01 to 24 are approved and pushed.
 
 | Phase | Prompts | Status |
 |---|---|---|
@@ -11,7 +11,7 @@ _Last updated: 2026-11-22._ The roadmap is the 42 prompts in `WonderCode_Product
 | B. Data and identity | 06 to 09 | Done (schema applied to `wondercode-dev`) |
 | C. Design and navigation | 10 to 13 | Done |
 | D. AI creation | 14 to 19 | 14 to 16 approved and pushed (latest `bd2eb94`); 17 approved and pushed (`b4ac27e`); 18 approved and pushed (`4a5cab4`); 19 (code validation) approved and pushed |
-| E. Workspace and preview | 20 to 24 | 20 (workspace layout) approved and pushed (`330fd6f`); 21 (Monaco) approved and pushed (`20168f3`); 22 (sandboxed preview) approved and pushed (`f685bb9`); 23 (run, stop, restart) done, pushed, awaiting approval |
+| E. Workspace and preview | 20 to 24 | 20 (workspace layout) approved and pushed (`330fd6f`); 21 (Monaco) approved and pushed (`20168f3`); 22 (sandboxed preview) approved and pushed (`f685bb9`); 23 (run, stop, restart) approved and pushed (`de8914e`); 24 (generation to workspace) approved and pushed |
 | F to H | 25 to 42 | Not started |
 
 ## How to resume tomorrow
@@ -20,7 +20,7 @@ _Last updated: 2026-11-22._ The roadmap is the 42 prompts in `WonderCode_Product
 3. Check the project still works:
    ```
    npm install
-   npm test            # expect 218 API + 107 web tests passing
+   npm test            # expect 218 API + 123 web tests passing
    npm run lint
    npm run dev:api     # http://localhost:3000/api/v1/health
    npm run dev:web     # http://localhost:5173   (style guide at /design)
@@ -34,7 +34,7 @@ _Last updated: 2026-11-22._ The roadmap is the 42 prompts in `WonderCode_Product
 - Never commit secrets. The service-role key stays in `apps/api/.env` only.
 
 ## Things to know
-- **Git:** Prompts 02 to 23 are committed and pushed to `origin/main` (Prompt 23 pushed but not yet approved). Commit and push after each approved prompt, and check `git status` shows no `.env` files first.
+- **Git:** Prompts 02 to 23 are committed and pushed to `origin/main` . Commit and push after each approved prompt, and check `git status` shows no `.env` files first.
 - **Never put real keys in `.env.example`.** Real values belong only in the git-ignored `.env` files.
 - Supabase project is the dev one only; production is not configured. Migrations were applied by pasting SQL in the dashboard.
 - Mock AI is the only provider; real providers are deferred (ADR 0002, `docs/ai/provider-architecture.md`).
@@ -58,3 +58,4 @@ _Last updated: 2026-11-22._ The roadmap is the 42 prompts in `WonderCode_Product
 - Local `apps/api/.env.example` and `apps/web/.env.example` contain real Supabase keys (uncommitted). Never stage them; restore placeholders and rotate the service-role key.
 - Monaco and the sandbox preview have only been unit-tested with mocks / happy-dom; do a manual browser check at `/workspace` (Run, Stop, Restart, fetch must be blocked).
 - `npm install` can hang on this machine; run installs in your own terminal.
+- No "My projects" list yet (only the studio's saved step opens a project) and edits cannot be saved to the server until versions (Prompt 29). Local drafts are in `localStorage` (ADR 0023).
