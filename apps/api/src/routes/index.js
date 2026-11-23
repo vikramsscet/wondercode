@@ -4,6 +4,7 @@ import children from '../modules/children/children.routes.js';
 import { createGuestRouter } from '../modules/guests/guests.routes.js';
 import auth from '../modules/auth/auth.routes.js';
 import { createProjectsRouter } from '../modules/projects/projects.routes.js';
+import { createTeacherRouter } from '../modules/teacher/teacher.routes.js';
 import { createPromptsRouter } from '../modules/prompts/prompts.routes.js';
 
 // Mounted at /api/v1. Feature routers are added here by later prompts.
@@ -15,5 +16,6 @@ export function createRoutes(config) {
   router.use('/children', children);
   router.use('/prompts', createPromptsRouter(config));
   router.use('/projects', createProjectsRouter(config));
+  router.use('/teacher', createTeacherRouter(config));
   return router;
 }

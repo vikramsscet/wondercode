@@ -11,12 +11,15 @@ function strings(value, out = []) {
   return out;
 }
 
+// True when text has a link, HTML or something moderation blocks. Shared with the AI teacher.
+export const isUnsafeText = (t) => URL_LIKE.test(t) || HTML_LIKE.test(t) || !moderate(t).allowed;
+
 // Applied to ANY provider's explanation: no links, no HTML, nothing the moderation rules block.
 // Throws a generic error; what the model wrote never reaches the child or the logs.
 export function enforceExplanationPolicy(output) {
   const { concept, explanation, realLifeExample, tryThis } = output;
   const text = strings({ concept, explanation, realLifeExample, tryThis });
-  if (text.some((t) => URL_LIKE.test(t) || HTML_LIKE.test(t) || !moderate(t).allowed)) {
+  if (text.some(isUnsafeText)) {
     throw new AppError(
       502,
       'AI_INVALID_RESPONSE',

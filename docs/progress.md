@@ -3,7 +3,7 @@
 _Last updated: 2026-11-22._ The roadmap is the 42 prompts in `WonderCode_Product_and_Technical_Blueprint_README.md` (section 11).
 
 ## Where we are
-**Completed: Prompts 01 to 25 (25 of 42).** Next: **Prompt 26, AI Teacher UI.** Prompts 01 to 25 are approved and pushed.
+**Completed: Prompts 01 to 26 (26 of 42).** Next: **Prompt 27, Context-aware AI teacher.** Prompts 01 to 26 are approved and pushed.
 
 | Phase | Prompts | Status |
 |---|---|---|
@@ -11,7 +11,7 @@ _Last updated: 2026-11-22._ The roadmap is the 42 prompts in `WonderCode_Product
 | B. Data and identity | 06 to 09 | Done (schema applied to `wondercode-dev`) |
 | C. Design and navigation | 10 to 13 | Done |
 | D. AI creation | 14 to 19 | 14 to 16 approved and pushed (latest `bd2eb94`); 17 approved and pushed (`b4ac27e`); 18 approved and pushed (`4a5cab4`); 19 (code validation) approved and pushed |
-| E. Workspace and preview | 20 to 24 | 20 (workspace layout) approved and pushed (`330fd6f`); 21 (Monaco) approved and pushed (`20168f3`); 22 (sandboxed preview) approved and pushed (`f685bb9`); 23 (run, stop, restart) approved and pushed (`de8914e`); 24 (generation to workspace) approved and pushed (`f40f033`); 25 (explanations) approved and pushed; migration `20261122000007` applied to wondercode-dev |
+| E. Workspace and preview | 20 to 24 | 20 (workspace layout) approved and pushed (`330fd6f`); 21 (Monaco) approved and pushed (`20168f3`); 22 (sandboxed preview) approved and pushed (`f685bb9`); 23 (run, stop, restart) approved and pushed (`de8914e`); 24 (generation to workspace) approved and pushed (`f40f033`); 25 (explanations) approved and pushed (`93858eb`); 26 (AI teacher UI) approved and pushed; migration `20261122000007` applied to wondercode-dev |
 | F to H | 25 to 42 | Not started |
 
 ## How to resume tomorrow
@@ -20,7 +20,7 @@ _Last updated: 2026-11-22._ The roadmap is the 42 prompts in `WonderCode_Product
 3. Check the project still works:
    ```
    npm install
-   npm test            # expect 239 API + 132 web tests passing
+   npm test            # expect 251 API + 144 web tests passing
    npm run lint
    npm run dev:api     # http://localhost:3000/api/v1/health
    npm run dev:web     # http://localhost:5173   (style guide at /design)

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Alert, Badge, Button } from '../../components/ui/index.js';
+import { Alert, Badge, Button, Card } from '../../components/ui/index.js';
 import { cn } from '../../utils/cn.js';
 import { clearDraft, loadDraft, saveDraft } from './drafts.js';
 import ExplainPanel from './ExplainPanel.jsx';
+import TeacherPanel from './TeacherPanel.jsx';
 import EditorPane from './EditorPane.jsx';
 import FileExplorer from './FileExplorer.jsx';
 import { MOCK_PROJECT } from './mockProject.js';
@@ -178,6 +179,14 @@ export default function Workspace({ files, title, version, checked, draftKey, ex
         edited={Boolean(file) && file.path in edits}
         selection={selection}
       />
+      {explain ? (
+        <TeacherPanel session={explain} />
+      ) : (
+        <Card className="mt-4">
+          <h2 className="text-xl font-extrabold">Ask the AI teacher</h2>
+          <p className="mt-1 text-ink-600">Open a saved project to chat with the AI teacher.</p>
+        </Card>
+      )}
     </section>
   );
 }
