@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Badge, Button, Card, SelectField, Spinner } from '../../components/ui/index.js';
 import { ApiError, apiRequest } from '../../services/apiClient.js';
+import VisualExplanation from '../visuals/VisualExplanation.jsx';
 import { LANGUAGES } from '../prompt-studio/promptStudioData.js';
 import { QUESTION_MAX, SUGGESTED, parseParts } from './teacherData.js';
 
@@ -63,7 +64,9 @@ export default function TeacherPanel({ session, file, edited, selection }) {
       .then((data) => {
         if (!live || touched.current || !data.conversationId) return;
         setConversationId(data.conversationId);
-        setMessages(data.messages.map(({ role, text, isMock }) => ({ role, text, isMock })));
+        setMessages(
+          data.messages.map(({ role, text, isMock, visual }) => ({ role, text, isMock, visual })),
+        );
       })
       .catch(() => {}); // a missing history is not an error for the child
     return () => {
@@ -114,7 +117,10 @@ export default function TeacherPanel({ session, file, edited, selection }) {
       });
       if (data.status === 'ok') {
         setConversationId(data.conversationId);
-        setMessages((m) => [...m, { role: 'teacher', text: data.answer, isMock: data.isMock }]);
+        setMessages((m) => [
+          ...m,
+          { role: 'teacher', text: data.answer, isMock: data.isMock, visual: data.visual },
+        ]);
         setFollowUps(data.followUps ?? []);
       } else {
         setMessages((m) => [...m, { role: 'note', text: data.message }]);
@@ -193,6 +199,7 @@ export default function TeacherPanel({ session, file, edited, selection }) {
           >
             <span className="sr-only">{m.role === 'child' ? 'You said: ' : 'Teacher said: '}</span>
             <Text text={m.text} />
+            {m.visual && <VisualExplanation visual={m.visual} language={language} />}
             {m.isMock && (
               <Badge tone="sun" className="mt-1">
                 Sample answer

@@ -1,6 +1,6 @@
 # AI teacher API (Prompts 26 and 27)
 
-Context-aware, age-appropriate teacher for a saved project. Children (parent JWT + `X-Child-Id`) and guests (`X-Guest-Token`). Envelope as usual. Apply migration `20261122000008_teacher_conversations.sql` first.
+Context-aware, age-appropriate teacher for a saved project. Children (parent JWT + `X-Child-Id`) and guests (`X-Guest-Token`). Envelope as usual. Apply migrations `20261122000008_teacher_conversations.sql` and `20261122000009_teacher_message_visuals.sql` first.
 
 ## POST `/api/v1/teacher/ask`
 ```json
@@ -22,12 +22,14 @@ Strict body. `projectId` is required; `versionId` defaults to the current versio
 ### Response `data`
 ```json
 { "status": "ok", "conversationId": "uuid", "answer": "…", "language": "en",
-  "followUps": ["…"], "isMock": true, "remainingToday": 49 }
+  "followUps": ["…"], "visual": { … }, "isMock": true, "remainingToday": 49 }
 ```
+`visual` is optional (see [visual explanations](../ai/visual-explanations.md)); it is stored with the message and returned by the GET below.
+
 or `{ "status": "blocked" | "invalid", "message": "…", "followUps": [] }` (HTTP 200).
 
 ## GET `/api/v1/teacher/conversations?projectId=`
-The latest chat for the project: `{ conversationId, messages: [{ role: "child"|"teacher", text, isMock, createdAt }] }`, or `{ conversationId: null, messages: [] }`. Expired messages are not returned. Unknown or foreign project: 404.
+The latest chat for the project: `{ conversationId, messages: [{ role: "child"|"teacher", text, isMock, visual?, createdAt }] }`, or `{ conversationId: null, messages: [] }`. Expired messages are not returned. Unknown or foreign project: 404.
 
 ## DELETE `/api/v1/teacher/conversations/:conversationId`
 "Clear chat": removes the owner's conversation and its messages. Another owner's id is a 404.
@@ -42,4 +44,4 @@ The latest chat for the project: `{ conversationId, messages: [{ role: "child"|"
 `TEACHER_DAILY_LIMIT_CHILD`, `TEACHER_DAILY_LIMIT_GUEST`, `TEACHER_RETENTION_DAYS` (all optional, defaults above).
 
 ## Not included
-Visual explanations (Prompt 28), per-minute rate limits and abuse protection (Prompt 37), parent view of chats.
+Per-minute rate limits and abuse protection (Prompt 37), parent view of chats.

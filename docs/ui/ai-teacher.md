@@ -17,4 +17,5 @@
 - The latest chat is restored on load (`GET /teacher/conversations`). "Clear chat" deletes it on the server.
 - Nothing is written to browser storage.
 
-Visual explanations (diagrams, step sequences) come in Prompt 28.
+## Pictures (Prompt 28)
+When an answer carries a `visual`, it is drawn inside the teacher's bubble (and after a restore) by `VisualExplanation`. See `docs/ai/visual-explanations.md`.

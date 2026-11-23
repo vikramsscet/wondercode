@@ -5,6 +5,7 @@ import {
   CONCEPTS,
   PLAN_DETAILS,
   TEMPLATES,
+  VISUALS,
   detectConcept,
   detectType,
   languageOf,
@@ -71,7 +72,8 @@ export class MockAIProvider extends AIProvider {
     const lineEnd = Math.min(input.lineEnd, lines.length);
     const lineStart = Math.min(input.lineStart, lineEnd);
     const snippet = lines.slice(lineStart - 1, lineEnd).join('\n');
-    const concept = CONCEPTS[detectConcept(input.filePath, snippet)];
+    const key = detectConcept(input.filePath, snippet);
+    const concept = CONCEPTS[key];
     return done(
       {
         filePath: input.filePath,
@@ -83,6 +85,7 @@ export class MockAIProvider extends AIProvider {
         explanation: concept.explanation,
         realLifeExample: concept.example,
         tryThis: concept.tryThis,
+        visual: VISUALS[key],
       },
       input,
     );
@@ -128,7 +131,8 @@ export class MockAIProvider extends AIProvider {
     const where = input.context?.filePath
       ? ` (${input.context.filePath}${input.context.lineStart ? `, ${input.context.lineStart === input.context.lineEnd ? 'line' : 'lines'} ${input.context.lineStart}${input.context.lineEnd > input.context.lineStart ? `-${input.context.lineEnd}` : ''}` : ''})`
       : '';
-    const concept = CONCEPTS[detectConcept(input.context?.filePath ?? '', snippet)];
+    const key = detectConcept(input.context?.filePath ?? '', snippet);
+    const concept = CONCEPTS[key];
     const lead = {
       en: 'Great question! (Sample answer)',
       hi: 'बहुत अच्छा सवाल! (नमूना जवाब)',
@@ -139,6 +143,7 @@ export class MockAIProvider extends AIProvider {
         answer: `${lead}${where} ${concept.explanation[input.explanationLanguage]} ${concept.example[input.explanationLanguage]}`,
         language: input.explanationLanguage,
         followUps: [concept.tryThis, 'Can you explain it back in your own words?'],
+        visual: VISUALS[key],
       },
       input,
     );

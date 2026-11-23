@@ -1,6 +1,6 @@
 import { AppError } from '../../utils/AppError.js';
 import { insertUsageEvent } from '../ai/usage.repository.js';
-import { isUnsafeText } from '../explanations/explanations.policy.js';
+import { isUnsafeText, strings } from '../explanations/explanations.policy.js';
 import { moderateWithHook } from '../prompts/prompts.moderation.js';
 import { cleanPrompt, hasLetters, PROMPT_MAX, PROMPT_MIN } from '../prompts/prompts.text.js';
 import * as projects from '../projects/projects.repository.js';
@@ -114,7 +114,7 @@ export async function askTeacher(ctx, owner, child, body) {
   });
 
   // Any provider's answer must be link-free, HTML-free and pass moderation.
-  if ([data.answer, ...data.followUps].some(isUnsafeText)) {
+  if ([data.answer, ...data.followUps, ...strings(data.visual)].some(isUnsafeText)) {
     throw new AppError(
       502,
       'AI_INVALID_RESPONSE',
@@ -137,6 +137,7 @@ export async function askTeacher(ctx, owner, child, body) {
       role: 'child',
       content: text,
       is_mock: false,
+      visual: null,
       expires_at: expiresAt,
     },
     {
@@ -144,6 +145,7 @@ export async function askTeacher(ctx, owner, child, body) {
       role: 'teacher',
       content: answer,
       is_mock: Boolean(meta.isMock),
+      visual: data.visual ?? null,
       expires_at: expiresAt,
     },
   ]);
@@ -155,6 +157,7 @@ export async function askTeacher(ctx, owner, child, body) {
     answer,
     language: data.language,
     followUps: data.followUps,
+    ...(data.visual && { visual: data.visual }),
     isMock: meta.isMock,
     remainingToday: Math.max(limit - used - 1, 0),
   };
@@ -173,6 +176,7 @@ export async function getConversation({ supabase, now = () => new Date() }, owne
       role: m.role,
       text: m.content,
       isMock: m.is_mock,
+      ...(m.visual && { visual: m.visual }),
       createdAt: m.created_at,
     })),
   };

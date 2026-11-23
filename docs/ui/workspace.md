@@ -37,6 +37,8 @@ Layout shell for viewing a project's files. Code lives in `apps/web/src/features
 ## Explain my code (Prompt 25)
 `ExplainPanel` sits under the panes. It uses the selected lines (line numbers from Monaco), a language picker (default: the child's explanation language) and `POST /projects/:id/explanations`. The browser hashes the selected **saved** lines (SHA-256) and sends the hash, never the code. Edited files are blocked ("Reset your changes to this file first"), the sample workspace shows "Open a saved project…", and the 409 stale case says to select the lines again. Mock output carries a "Sample explanation" badge. See `docs/api/explanations.md`.
 
+Explanation results also show a picture when the AI sends one (Prompt 28, `docs/ai/visual-explanations.md`).
+
 ## AI teacher (Prompt 26)
 `TeacherPanel` sits under the explain panel. See `docs/ui/ai-teacher.md` and `docs/api/teacher.md`.
 

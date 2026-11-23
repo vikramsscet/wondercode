@@ -18,6 +18,7 @@ const ANSWER = {
   language: 'en',
   followUps: ['Can you change the number?'],
   isMock: true,
+  visual: { title: { en: 'How a variable works' }, steps: [{ en: 'Name it' }, { en: 'Fill it' }] },
 };
 const FILE = { path: 'script.js', content: 'let a = 1;\nlet b = 2;\nlet c = 3;\n' };
 const session = { projectId: 'p1', versionId: 'v1', childId: 'c1', defaultLanguage: 'en' };
@@ -88,6 +89,14 @@ describe('TeacherPanel chat', () => {
     });
     expect(screen.getByRole('button', { name: 'Can you change the number?' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'What can I try next?' })).not.toBeInTheDocument();
+  });
+
+  it('draws the teacher\u2019s picture inside the answer', async () => {
+    api();
+    panel();
+    await userEvent.click(screen.getByRole('button', { name: 'What can I try next?' }));
+    const visual = await screen.findByRole('region', { name: 'How a variable works' });
+    expect(visual).toHaveTextContent('Fill it');
   });
 
   it('continues the same conversation on the next question', async () => {
@@ -245,7 +254,12 @@ describe('TeacherPanel conversation', () => {
     conversationId: 'conv9',
     messages: [
       { role: 'child', text: 'What is a loop?' },
-      { role: 'teacher', text: 'A loop repeats things.', isMock: true },
+      {
+        role: 'teacher',
+        text: 'A loop repeats things.',
+        isMock: true,
+        visual: { title: { en: 'Loop picture' }, steps: [{ en: 'Do it' }, { en: 'Again' }] },
+      },
     ],
   });
 
@@ -253,6 +267,7 @@ describe('TeacherPanel conversation', () => {
     api({ history });
     panel();
     expect(await screen.findByText('A loop repeats things.')).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Loop picture' })).toBeInTheDocument(); // restored too
     expect(screen.getByText('What is a loop?')).toBeInTheDocument();
     expect(calls[0].url).toMatch(/\/teacher\/conversations\?projectId=p1$/);
     await userEvent.type(textbox(), 'And a function?{Enter}');

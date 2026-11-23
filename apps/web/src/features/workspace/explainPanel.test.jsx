@@ -34,6 +34,10 @@ const DATA = {
   explanation: { en: 'A small recipe.', hi: 'छोटी रेसिपी।', hinglish: 'Chhoti recipe.' },
   realLifeExample: { en: 'A recipe card.', hi: 'रेसिपी कार्ड।', hinglish: 'Recipe card.' },
   tryThis: 'Call it twice.',
+  visual: {
+    title: { en: 'How a function runs', hi: 'हि', hinglish: 'Hg' },
+    steps: [{ en: 'Call it' }, { en: 'It runs' }],
+  },
 };
 const reply = (status, body) => ({ ok: status < 400, status, json: async () => body });
 let calls;
@@ -90,6 +94,22 @@ describe('ExplainPanel', () => {
       explanationLanguage: 'en',
     });
     expect(JSON.stringify(calls[0].body)).not.toContain('score');
+  });
+
+  it('draws the visual explanation under the answer', async () => {
+    api();
+    panel();
+    await userEvent.click(screen.getByRole('button', { name: /Explain lines/ }));
+    const visual = await screen.findByRole('region', { name: 'How a function runs' });
+    expect(visual).toHaveTextContent('It runs');
+  });
+
+  it('shows the answer without a picture when there is no visual', async () => {
+    api(() => reply(200, { success: true, data: { ...DATA, visual: undefined } }));
+    panel();
+    await userEvent.click(screen.getByRole('button', { name: /Explain lines/ }));
+    await screen.findByText('A small recipe.');
+    expect(screen.queryByRole('region', { name: /function runs/ })).not.toBeInTheDocument();
   });
 
   it('uses the chosen language and clears the old answer when it changes', async () => {

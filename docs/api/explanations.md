@@ -25,9 +25,11 @@ Response `data`:
   "codeHash": "…", "explanationLanguage": "en", "concept": "function",
   "explanation": { "en": "…", "hi": "…", "hinglish": "…" },
   "realLifeExample": { "en": "…", "hi": "…", "hinglish": "…" },
-  "tryThis": "…", "isMock": true, "stale": false, "cached": false }
+  "tryThis": "…", "visual": { "title": { "en": "…" }, "steps": [ … ] }, "isMock": true, "stale": false, "cached": false }
 ```
 The response and logs never contain the code.
+
+`visual` is optional; see [visual explanations](../ai/visual-explanations.md).
 
 ## GET `/api/v1/projects/:projectId/explanations?versionId=`
 Saved explanations of a version (default: the current one), oldest first. `stale` is true when the explanation's version is no longer the project's current version.

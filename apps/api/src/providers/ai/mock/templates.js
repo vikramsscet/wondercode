@@ -466,6 +466,140 @@ export const CONCEPTS = {
   },
 };
 
+// ----- visual explanations per concept (en / hi / hinglish) -----
+const l = (en, hi, hinglish) => ({ en, hi, hinglish });
+export const VISUALS = {
+  variable: {
+    title: l('How a variable works', 'वेरिएबल कैसे काम करता है', 'Variable kaise kaam karta hai'),
+    steps: [
+      l('Give the box a name.', 'डिब्बे को एक नाम दो।', 'Dabbe ko ek naam do.'),
+      l('Put a value inside.', 'अंदर एक वैल्यू रखो।', 'Andar ek value rakho.'),
+      l('Use the name to read it later.', 'बाद में नाम से उसे पढ़ो।', 'Baad mein naam se use padho.'),
+    ],
+    examples: [
+      { input: 'score = 0', output: 'score is 0' },
+      { input: 'score = score + 1', output: 'score is 1' },
+    ],
+  },
+  function: {
+    title: l('How a function runs', 'फ़ंक्शन कैसे चलता है', 'Function kaise chalta hai'),
+    flow: {
+      nodes: [
+        {
+          id: 'call',
+          kind: 'start',
+          text: l('You call the function', 'तुम फ़ंक्शन बुलाते हो', 'Tum function bulate ho'),
+          next: 'run',
+        },
+        {
+          id: 'run',
+          kind: 'step',
+          text: l('Its steps run', 'उसके स्टेप चलते हैं', 'Uske steps chalte hain'),
+          next: 'done',
+        },
+        {
+          id: 'done',
+          kind: 'end',
+          text: l('Back to where you were', 'वापस वहीं जहाँ थे', 'Wapas wahin jahan the'),
+        },
+      ],
+    },
+  },
+  event: {
+    title: l('What happens on a click', 'क्लिक पर क्या होता है', 'Click par kya hota hai'),
+    flow: {
+      nodes: [
+        {
+          id: 'wait',
+          kind: 'start',
+          text: l('The page waits', 'पेज इंतज़ार करता है', 'Page intezaar karta hai'),
+          next: 'click',
+        },
+        {
+          id: 'click',
+          kind: 'decision',
+          text: l('Did someone click?', 'क्या किसी ने क्लिक किया?', 'Kya kisi ne click kiya?'),
+          yes: 'run',
+          no: 'wait',
+        },
+        {
+          id: 'run',
+          kind: 'step',
+          text: l('Your code runs', 'तुम्हारा कोड चलता है', 'Tumhara code chalta hai'),
+          next: 'wait',
+        },
+      ],
+    },
+  },
+  condition: {
+    title: l('How a choice works', 'चुनाव कैसे काम करता है', 'Choice kaise kaam karta hai'),
+    flow: {
+      nodes: [
+        {
+          id: 'ask',
+          kind: 'decision',
+          text: l('Is the answer right?', 'क्या जवाब सही है?', 'Kya jawab sahi hai?'),
+          yes: 'win',
+          no: 'try',
+        },
+        {
+          id: 'win',
+          kind: 'step',
+          text: l('Add a point', 'एक पॉइंट जोड़ो', 'Ek point jodo'),
+          next: 'end',
+        },
+        {
+          id: 'try',
+          kind: 'step',
+          text: l('Show "try again"', '"फिर कोशिश करो" दिखाओ', '"Phir try karo" dikhao'),
+          next: 'end',
+        },
+        { id: 'end', kind: 'end', text: l('Go on', 'आगे बढ़ो', 'Aage badho') },
+      ],
+    },
+    examples: [
+      { input: 'answer is right', output: 'score goes up' },
+      { input: 'answer is wrong', output: 'try again' },
+    ],
+  },
+  css: {
+    title: l(
+      'How a style rule works',
+      'स्टाइल नियम कैसे काम करता है',
+      'Style rule kaise kaam karta hai',
+    ),
+    steps: [
+      l('Pick what to style.', 'चुनो किसे सजाना है।', 'Chuno kise sajana hai.'),
+      l('Say how it should look.', 'बताओ वह कैसा दिखे।', 'Batao woh kaisa dikhe.'),
+      l('The page updates.', 'पेज बदल जाता है।', 'Page badal jata hai.'),
+    ],
+  },
+  html: {
+    title: l('How a page is built', 'पेज कैसे बनता है', 'Page kaise banta hai'),
+    steps: [
+      l('Each tag is a building block.', 'हर टैग एक ब्लॉक है।', 'Har tag ek block hai.'),
+      l(
+        'Blocks sit inside other blocks.',
+        'ब्लॉक दूसरे ब्लॉक के अंदर रहते हैं।',
+        'Blocks doosre blocks ke andar rehte hain.',
+      ),
+      l(
+        'The browser shows them in order.',
+        'ब्राउज़र उन्हें क्रम से दिखाता है।',
+        'Browser unhe order mein dikhata hai.',
+      ),
+    ],
+  },
+  general: {
+    title: l('Reading code step by step', 'कोड को स्टेप-दर-स्टेप पढ़ना', 'Code ko step by step padhna'),
+    steps: [
+      l('Read one line at a time.', 'एक बार में एक लाइन पढ़ो।', 'Ek baar mein ek line padho.'),
+      l('Guess what it does.', 'अंदाज़ा लगाओ कि यह क्या करती है।', 'Guess karo ye kya karti hai.'),
+      l('Change it and check.', 'उसे बदलो और जाँचो।', 'Use badlo aur check karo.'),
+    ],
+  },
+};
+
 export const detectConcept = (path, snippet) => {
   if (path.endsWith('.css')) return 'css';
   if (path.endsWith('.html')) return 'html';
@@ -494,8 +628,6 @@ export const COLOURS = {
   hara: '#22c55e',
   peela: '#facc15',
 };
-
-const l = (en, hi, hinglish) => ({ en, hi, hinglish });
 
 // How the child uses each sample project, and what happens when they do (used in project plans).
 export const PLAN_DETAILS = {

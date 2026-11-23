@@ -40,6 +40,51 @@ export const generatedProject = z.object({
   learningConcepts: z.array(text(60)).max(10),
 });
 
+// ----- visual explanations (Prompt 28) -----
+// The AI only DESCRIBES a picture as data. Our own components draw it; no HTML, SVG or script.
+const nodeId = z.string().regex(/^[a-z0-9_]{1,20}$/);
+const flowNode = z
+  .object({
+    id: nodeId,
+    kind: z.enum(['start', 'step', 'decision', 'end']),
+    text: localized(80),
+    next: nodeId.optional(), // where to go after a start/step
+    yes: nodeId.optional(), // decisions go one of two ways
+    no: nodeId.optional(),
+  })
+  .strict();
+
+export const visualExplanation = z
+  .object({
+    title: localized(80),
+    steps: z.array(localized(120)).min(2).max(8).optional(),
+    flow: z
+      .object({ nodes: z.array(flowNode).min(2).max(8) })
+      .strict()
+      .optional(),
+    examples: z
+      .array(z.object({ input: text(60), output: text(60) }).strict())
+      .min(1)
+      .max(4)
+      .optional(),
+  })
+  .strict()
+  .superRefine((v, ctx) => {
+    const fail = (message) => ctx.addIssue({ code: 'custom', message });
+    if (!v.steps && !v.flow && !v.examples) fail('a visual needs steps, a flow or examples');
+    if (!v.flow) return;
+    const ids = v.flow.nodes.map((n) => n.id);
+    if (new Set(ids).size !== ids.length) fail('flow node ids must be unique');
+    for (const n of v.flow.nodes) {
+      const targets = [n.next, n.yes, n.no].filter(Boolean);
+      if (targets.some((t) => !ids.includes(t))) fail('flow points at a node that does not exist');
+      if (n.kind === 'decision' && !(n.yes && n.no)) fail('a question needs a yes and a no');
+      if (n.kind !== 'decision' && (n.yes || n.no)) fail('only a question has yes and no');
+      if (n.kind === 'decision' && n.next) fail('a question has no next');
+      if (n.kind === 'end' && targets.length > 0) fail('the end has nothing after it');
+    }
+  });
+
 export const codeExplanation = z.object({
   filePath,
   lineStart: z.number().int().min(1),
@@ -49,6 +94,7 @@ export const codeExplanation = z.object({
   explanation: localized(600),
   realLifeExample: localized(300),
   tryThis: text(300),
+  visual: visualExplanation.optional(),
 });
 
 export const refinedProject = z.object({
@@ -63,6 +109,7 @@ export const teacherAnswer = z.object({
   answer: text(1500),
   language,
   followUps: z.array(text(120)).max(4),
+  visual: visualExplanation.optional(),
 });
 
 // ----- inputs (what callers pass to AIService) -----

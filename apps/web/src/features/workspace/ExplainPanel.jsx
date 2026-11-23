@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Alert, Badge, Button, Card, SelectField, Spinner } from '../../components/ui/index.js';
 import { ApiError, apiRequest } from '../../services/apiClient.js';
+import VisualExplanation from '../visuals/VisualExplanation.jsx';
 import { LANGUAGES } from '../prompt-studio/promptStudioData.js';
 
 export async function sha256Hex(text) {
@@ -126,6 +127,7 @@ export default function ExplainPanel({ explain, file, edited, selection }) {
             <p className="mt-2 text-lg">{d.explanation[language]}</p>
             <p className="mt-2 text-ink-700">{d.realLifeExample[language]}</p>
             <p className="mt-2 font-bold text-brand-800">Try this: {d.tryThis}</p>
+            <VisualExplanation visual={d.visual} language={language} />
           </div>
         )}
       </div>
