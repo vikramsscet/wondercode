@@ -61,4 +61,5 @@ The service-role key and AI keys must never appear in frontend code or `VITE_*` 
 | 24 Generation to workspace (`/workspace/:projectId`, drafts) | Done, awaiting review |
 | 25 Versioned code explanations (`POST /projects/:id/explanations`) | Done, approved |
 | 26 AI Teacher UI (`POST /teacher/ask`, `TeacherPanel`) | Done, approved |
-| 27 onward | Not started |
+| 27 Context-aware AI teacher (context, age rules, limits, stored chats) | Done, approved |
+| 28 onward | Not started |

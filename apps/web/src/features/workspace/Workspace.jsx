@@ -180,7 +180,12 @@ export default function Workspace({ files, title, version, checked, draftKey, ex
         selection={selection}
       />
       {explain ? (
-        <TeacherPanel session={explain} />
+        <TeacherPanel
+          session={explain}
+          file={file}
+          edited={Boolean(file) && file.path in edits}
+          selection={selection}
+        />
       ) : (
         <Card className="mt-4">
           <h2 className="text-xl font-extrabold">Ask the AI teacher</h2>

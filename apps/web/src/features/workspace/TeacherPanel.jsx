@@ -1,10 +1,16 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Alert, Badge, Button, Card, SelectField, Spinner } from '../../components/ui/index.js';
 import { ApiError, apiRequest } from '../../services/apiClient.js';
 import { LANGUAGES } from '../prompt-studio/promptStudioData.js';
 import { QUESTION_MAX, SUGGESTED, parseParts } from './teacherData.js';
 
 const errorText = (err) => {
+  if (
+    err instanceof ApiError &&
+    ['TEACHER_LIMIT_REACHED', 'TEACHER_CONVERSATION_FULL'].includes(err.code)
+  ) {
+    return err.message; // friendly text written by the server
+  }
   if (err instanceof ApiError && err.status === 429) {
     return 'Lots of questions! Please wait a little and try again.';
   }
@@ -31,21 +37,58 @@ function Text({ text }) {
   );
 }
 
-// A simple text chat with the AI teacher. The conversation lives only in memory (nothing is
-// written to browser storage) and only the question and language are sent (no code, no tools).
-export default function TeacherPanel({ session }) {
+// Chat with the AI teacher about the open project. The browser says which project and which
+// lines are selected; the server reads the SAVED code itself, so no code is sent. The chat is
+// kept by the server for a short time (restored after a reload, cleared with "Clear chat"),
+// and nothing is written to browser storage.
+export default function TeacherPanel({ session, file, edited, selection }) {
   const [language, setLanguage] = useState(session.defaultLanguage ?? 'en');
   const [messages, setMessages] = useState([]); // { role: child | teacher | note, text, isMock }
   const [followUps, setFollowUps] = useState([]);
   const [input, setInput] = useState('');
   const [status, setStatus] = useState('idle'); // idle | sending | error
   const [failure, setFailure] = useState(null); // { message, question }
+  const [conversationId, setConversationId] = useState(null);
+  const [useLines, setUseLines] = useState(true);
   const sendingRef = useRef(false);
+  const touched = useRef(false); // true once the child has sent something in this visit
+
+  // Restore the latest chat for this project.
+  useEffect(() => {
+    let live = true;
+    apiRequest(`/teacher/conversations?projectId=${encodeURIComponent(session.projectId)}`, {
+      childId: session.childId,
+      guestToken: session.guestToken,
+    })
+      .then((data) => {
+        if (!live || touched.current || !data.conversationId) return;
+        setConversationId(data.conversationId);
+        setMessages(data.messages.map(({ role, text, isMock }) => ({ role, text, isMock })));
+      })
+      .catch(() => {}); // a missing history is not an error for the child
+    return () => {
+      live = false;
+    };
+  }, [session.projectId, session.childId, session.guestToken]);
+
+  // The lines the teacher may look at: the selected SAVED lines of the open file.
+  const lines = file ? file.content.split('\n').length : 0;
+  const range =
+    file && !edited && selection?.path === file.path
+      ? { start: selection.startLine, end: Math.min(selection.endLine, lines) }
+      : null;
+  const sendLines = Boolean(range) && useLines;
+  const rangeText = range
+    ? range.start === range.end
+      ? `line ${range.start}`
+      : `lines ${range.start} to ${range.end}`
+    : '';
 
   const send = async (raw, { retry = false } = {}) => {
     const question = raw.trim();
     if (!question || sendingRef.current) return;
     sendingRef.current = true;
+    touched.current = true;
     setStatus('sending');
     setFailure(null);
     setFollowUps([]);
@@ -56,11 +99,21 @@ export default function TeacherPanel({ session }) {
     try {
       const data = await apiRequest('/teacher/ask', {
         method: 'POST',
-        body: { question, explanationLanguage: language },
+        body: {
+          projectId: session.projectId,
+          versionId: session.versionId,
+          ...(conversationId && { conversationId }),
+          question,
+          explanationLanguage: language,
+          ...(sendLines && {
+            selection: { filePath: file.path, lineStart: range.start, lineEnd: range.end },
+          }),
+        },
         childId: session.childId,
         guestToken: session.guestToken,
       });
       if (data.status === 'ok') {
+        setConversationId(data.conversationId);
         setMessages((m) => [...m, { role: 'teacher', text: data.answer, isMock: data.isMock }]);
         setFollowUps(data.followUps ?? []);
       } else {
@@ -72,6 +125,27 @@ export default function TeacherPanel({ session }) {
       setStatus('error');
     } finally {
       sendingRef.current = false;
+    }
+  };
+
+  const clear = async () => {
+    if (!conversationId) {
+      setMessages([]);
+      setFollowUps([]);
+      return;
+    }
+    try {
+      await apiRequest(`/teacher/conversations/${conversationId}`, {
+        method: 'DELETE',
+        childId: session.childId,
+        guestToken: session.guestToken,
+      });
+      setMessages([]);
+      setFollowUps([]);
+      setConversationId(null);
+      setFailure(null);
+    } catch (err) {
+      setFailure({ message: errorText(err), question: null });
     }
   };
 
@@ -136,9 +210,11 @@ export default function TeacherPanel({ session }) {
       {failure && (
         <Alert tone="warning" className="mt-3">
           {failure.message}{' '}
-          <Button size="sm" onClick={() => send(failure.question, { retry: true })}>
-            Try again
-          </Button>
+          {failure.question && (
+            <Button size="sm" onClick={() => send(failure.question, { retry: true })}>
+              Try again
+            </Button>
+          )}
         </Alert>
       )}
 
@@ -153,6 +229,30 @@ export default function TeacherPanel({ session }) {
           ))}
         </ul>
       )}
+
+      <div className="mt-3 text-sm text-ink-700">
+        {range ? (
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={useLines}
+              onChange={(e) => setUseLines(e.target.checked)}
+            />
+            Show the teacher my selected lines ({file.path}, {rangeText})
+          </label>
+        ) : edited ? (
+          <p>
+            The teacher looks at your saved code. Reset your changes to this file to share lines.
+          </p>
+        ) : (
+          <p>Select some lines in the code if you want to ask about them.</p>
+        )}
+        {messages.length > 0 && (
+          <Button size="sm" variant="ghost" className="mt-1" onClick={clear}>
+            Clear chat
+          </Button>
+        )}
+      </div>
 
       <form
         className="mt-3"

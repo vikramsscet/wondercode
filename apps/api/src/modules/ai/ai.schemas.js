@@ -97,8 +97,25 @@ export const teacherInput = z
   .object({
     question: text(500),
     explanationLanguage: language.default('en'),
+    age: z.number().int().min(8).max(12).optional(), // children only
+    maxAnswerChars: z.number().int().min(100).max(1500).optional(),
+    rules: z.array(text(200)).max(10).optional(), // teaching rules the provider must follow
+    // Only what the server decided the teacher may see: never other files or other projects.
     context: z
-      .object({ filePath: filePath.optional(), code: z.string().max(MAX_FILE_BYTES).optional() })
+      .object({
+        projectTitle: text(100).optional(),
+        projectType: z.string().max(30).optional(),
+        learningConcepts: z.array(text(60)).max(10).optional(),
+        filePath: filePath.optional(),
+        lineStart: z.number().int().min(1).optional(),
+        lineEnd: z.number().int().min(1).optional(),
+        code: z.string().max(4000).optional(), // the selected saved lines only
+        concept: text(60).optional(), // from a saved explanation of those lines
+      })
+      .optional(),
+    history: z
+      .array(z.object({ role: z.enum(['child', 'teacher']), text: text(400) }))
+      .max(6)
       .optional(),
   })
   .strict();

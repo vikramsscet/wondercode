@@ -125,6 +125,9 @@ export class MockAIProvider extends AIProvider {
 
   async answerTeacherQuestion(input) {
     const snippet = input.context?.code ?? '';
+    const where = input.context?.filePath
+      ? ` (${input.context.filePath}${input.context.lineStart ? `, ${input.context.lineStart === input.context.lineEnd ? 'line' : 'lines'} ${input.context.lineStart}${input.context.lineEnd > input.context.lineStart ? `-${input.context.lineEnd}` : ''}` : ''})`
+      : '';
     const concept = CONCEPTS[detectConcept(input.context?.filePath ?? '', snippet)];
     const lead = {
       en: 'Great question! (Sample answer)',
@@ -133,7 +136,7 @@ export class MockAIProvider extends AIProvider {
     }[input.explanationLanguage];
     return done(
       {
-        answer: `${lead} ${concept.explanation[input.explanationLanguage]} ${concept.example[input.explanationLanguage]}`,
+        answer: `${lead}${where} ${concept.explanation[input.explanationLanguage]} ${concept.example[input.explanationLanguage]}`,
         language: input.explanationLanguage,
         followUps: [concept.tryThis, 'Can you explain it back in your own words?'],
       },

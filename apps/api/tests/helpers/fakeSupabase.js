@@ -12,22 +12,40 @@ export function createFakeSupabase({ users = {}, tables = {}, failInsert, failUp
     project_versions: [],
     project_files: [],
     code_explanations: [],
+    teacher_conversations: [],
+    teacher_messages: [],
     ...tables,
   };
   let seq = 0;
 
   function from(name) {
-    const q = { op: 'select', filters: [], patch: null, rows: null, head: false, count: false };
+    const q = {
+      op: 'select',
+      filters: [],
+      patch: null,
+      rows: null,
+      head: false,
+      count: false,
+      order: null,
+    };
     const run = () => {
       const all = db[name];
       const match = (r) =>
         q.filters.every(([k, kind, v]) => {
           if (kind === 'eq') return r[k] === v;
           if (kind === 'lt') return r[k] < v;
+          if (kind === 'gte') return r[k] >= v;
           return (r[k] ?? null) === v;
         });
       if (q.op === 'insert') {
-        const made = [q.rows].flat().map((r) => ({
+        // Like supabase-js, a bulk insert uses the union of all keys; missing ones become NULL.
+        const rowsIn = [q.rows].flat();
+        const keys = [...new Set(rowsIn.flatMap((r) => Object.keys(r)))];
+        const filled = rowsIn.map((r) => Object.fromEntries(keys.map((k) => [k, r[k] ?? null])));
+        if (name === 'teacher_messages' && filled.some((r) => r.is_mock === null)) {
+          throw new Error('null value in column "is_mock" violates not-null constraint');
+        }
+        const made = filled.map((r) => ({
           id: `00000000-0000-4000-8000-${String(++seq).padStart(12, '0')}`,
           deleted_at: null,
           ...(name === 'guest_sessions' && { status: 'active' }), // DB default
@@ -41,6 +59,10 @@ export function createFakeSupabase({ users = {}, tables = {}, failInsert, failUp
         return made;
       }
       const hits = all.filter(match);
+      if (q.order) {
+        const [col, dir] = q.order;
+        hits.sort((a, b) => (a[col] < b[col] ? -dir : a[col] > b[col] ? dir : 0));
+      }
       if (q.op === 'update') hits.forEach((r) => Object.assign(r, q.patch));
       if (q.op === 'delete') hits.forEach((r) => all.splice(all.indexOf(r), 1));
       return hits;
@@ -64,6 +86,10 @@ export function createFakeSupabase({ users = {}, tables = {}, failInsert, failUp
         q.op = 'delete';
         return b;
       },
+      gte: (k, v) => {
+        q.filters.push([k, 'gte', v]);
+        return b;
+      },
       lt: (k, v) => {
         q.filters.push([k, 'lt', v]);
         return b;
@@ -81,7 +107,10 @@ export function createFakeSupabase({ users = {}, tables = {}, failInsert, failUp
         q.filters.push([k, 'is', v]);
         return b;
       },
-      order: () => b,
+      order: (col, o = {}) => {
+        q.order = [col, o.ascending === false ? -1 : 1];
+        return b;
+      },
       maybeSingle: async () => finish(run(), 'one'),
       single: async () => finish(run(), 'one'),
       then: (resolve, reject) => Promise.resolve(finish(run())).then(resolve, reject),

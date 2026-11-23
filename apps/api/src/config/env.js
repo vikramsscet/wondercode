@@ -45,6 +45,11 @@ export function loadConfig(source = process.env) {
       usageLimit: positiveInt(source, 'GUEST_USAGE_LIMIT', 10),
       sessionsPerIpPerHour: positiveInt(source, 'GUEST_SESSIONS_PER_IP_PER_HOUR', 10),
     },
+    teacher: {
+      dailyLimitChild: positiveInt(source, 'TEACHER_DAILY_LIMIT_CHILD', 50),
+      dailyLimitGuest: positiveInt(source, 'TEACHER_DAILY_LIMIT_GUEST', 10),
+      retentionDays: positiveInt(source, 'TEACHER_RETENTION_DAYS', 30),
+    },
     supabase: {
       url: source.SUPABASE_URL || '',
       serviceRoleKey: source.SUPABASE_SERVICE_ROLE_KEY || '',

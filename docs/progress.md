@@ -3,7 +3,7 @@
 _Last updated: 2026-11-22._ The roadmap is the 42 prompts in `WonderCode_Product_and_Technical_Blueprint_README.md` (section 11).
 
 ## Where we are
-**Completed: Prompts 01 to 26 (26 of 42).** Next: **Prompt 27, Context-aware AI teacher.** Prompts 01 to 26 are approved and pushed.
+**Completed: Prompts 01 to 27 (27 of 42).** Next: **Prompt 28, Visual learning explanations.** Prompts 01 to 27 are approved and pushed.
 
 | Phase | Prompts | Status |
 |---|---|---|
@@ -11,7 +11,7 @@ _Last updated: 2026-11-22._ The roadmap is the 42 prompts in `WonderCode_Product
 | B. Data and identity | 06 to 09 | Done (schema applied to `wondercode-dev`) |
 | C. Design and navigation | 10 to 13 | Done |
 | D. AI creation | 14 to 19 | 14 to 16 approved and pushed (latest `bd2eb94`); 17 approved and pushed (`b4ac27e`); 18 approved and pushed (`4a5cab4`); 19 (code validation) approved and pushed |
-| E. Workspace and preview | 20 to 24 | 20 (workspace layout) approved and pushed (`330fd6f`); 21 (Monaco) approved and pushed (`20168f3`); 22 (sandboxed preview) approved and pushed (`f685bb9`); 23 (run, stop, restart) approved and pushed (`de8914e`); 24 (generation to workspace) approved and pushed (`f40f033`); 25 (explanations) approved and pushed (`93858eb`); 26 (AI teacher UI) approved and pushed; migration `20261122000007` applied to wondercode-dev |
+| E. Workspace and preview | 20 to 24 | 20 (workspace layout) approved and pushed (`330fd6f`); 21 (Monaco) approved and pushed (`20168f3`); 22 (sandboxed preview) approved and pushed (`f685bb9`); 23 (run, stop, restart) approved and pushed (`de8914e`); 24 (generation to workspace) approved and pushed (`f40f033`); 25 (explanations) approved and pushed (`93858eb`); 26 (AI teacher UI) approved and pushed (`66762f6`); 27 (context-aware teacher) approved and pushed; migration `20261122000008` applied to wondercode-dev; migration `20261122000007` applied to wondercode-dev |
 | F to H | 25 to 42 | Not started |
 
 ## How to resume tomorrow
@@ -20,7 +20,7 @@ _Last updated: 2026-11-22._ The roadmap is the 42 prompts in `WonderCode_Product
 3. Check the project still works:
    ```
    npm install
-   npm test            # expect 251 API + 144 web tests passing
+   npm test            # expect 269 API + 151 web tests passing
    npm run lint
    npm run dev:api     # http://localhost:3000/api/v1/health
    npm run dev:web     # http://localhost:5173   (style guide at /design)
@@ -60,3 +60,5 @@ _Last updated: 2026-11-22._ The roadmap is the 42 prompts in `WonderCode_Product
 - `npm install` can hang on this machine; run installs in your own terminal.
 - No "My projects" list yet (only the studio's saved step opens a project) and edits cannot be saved to the server until versions (Prompt 29). Local drafts are in `localStorage` (ADR 0023).
 - Migration `20261122000007_code_explanations.sql` was applied to wondercode-dev by the user. Explanations have only been tested with the fake database and mock AI, not end to end against live Supabase with a real signed-in user.
+- Migration `20261122000008_teacher_conversations.sql` is applied to wondercode-dev. `npm run purge:teacher -w apps/api` scheduled. New optional env vars `TEACHER_DAILY_LIMIT_CHILD`, `TEACHER_DAILY_LIMIT_GUEST`, `TEACHER_RETENTION_DAYS` are documented in `docs/api/teacher.md` (not added to `.env.example`, which holds local real keys).
+- Lesson: supabase-js bulk inserts turn missing keys into NULL (not column defaults). The fake database now copies this; always set every column in array inserts.
