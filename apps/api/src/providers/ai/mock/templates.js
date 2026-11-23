@@ -697,3 +697,109 @@ export const PLAN_DETAILS = {
     ],
   },
 };
+
+// ----- debugging help (en / hi / hinglish) -----
+// Mock only: picks a canned explanation from the kind and name of the error. `input.context.code`
+// holds saved lines around the error; a fix is offered only for an undefined name.
+export function debugFor(input) {
+  const { error, context } = input;
+  const msg = error.message ?? '';
+  const undefinedName =
+    /^(?:Uncaught )?(?:ReferenceError: )?([A-Za-z_$][\w$]*) is not defined/.exec(msg)?.[1];
+  if (error.kind === 'unresponsive') {
+    return {
+      explanation: l(
+        'Your project stopped answering. Something is running again and again.',
+        'तुम्हारा प्रोजेक्ट जवाब देना बंद हो गया। कुछ बार-बार चल रहा है।',
+        'Tumhara project jawab dena band ho gaya. Kuch baar-baar chal raha hai.',
+      ),
+      likelyCause: l(
+        'A loop may never reach its stopping rule.',
+        'हो सकता है कोई लूप अपने रुकने के नियम तक कभी न पहुँचे।',
+        'Ho sakta hai koi loop apne rukne ke rule tak kabhi na pahunche.',
+      ),
+    };
+  }
+  if (error.kind === 'blocked') {
+    return {
+      explanation: l(
+        'Your project tried to reach the internet. Projects here run on their own.',
+        'तुम्हारे प्रोजेक्ट ने इंटरनेट से जुड़ने की कोशिश की। यहाँ प्रोजेक्ट अकेले चलते हैं।',
+        'Tumhare project ne internet se judne ki koshish ki. Yahan projects akele chalte hain.',
+      ),
+      likelyCause: l(
+        'Some code asks for something from the web.',
+        'किसी कोड ने वेब से कुछ माँगा।',
+        'Kisi code ne web se kuch manga.',
+      ),
+    };
+  }
+  if (undefinedName) {
+    const original = context?.code?.split('\n')[error.line - context.lineStart];
+    return {
+      explanation: l(
+        `The computer does not know the name "${undefinedName}".`,
+        `कंप्यूटर "${undefinedName}" नाम को नहीं जानता।`,
+        `Computer "${undefinedName}" naam ko nahi jaanta.`,
+      ),
+      likelyCause: l(
+        'The name may have a typo, or it was never created with let or const.',
+        'नाम में गलती हो सकती है, या उसे let या const से कभी बनाया ही नहीं गया।',
+        'Naam mein galti ho sakti hai, ya use let ya const se kabhi banaya hi nahi gaya.',
+      ),
+      ...(original !== undefined && {
+        fix: {
+          description: l(
+            `Create "${undefinedName}" first with let.`,
+            `पहले let से "${undefinedName}" बनाओ।`,
+            `Pehle let se "${undefinedName}" banao.`,
+          ),
+          filePath: context.filePath,
+          lineStart: error.line,
+          lineEnd: error.line,
+          replacement: `let ${undefinedName} = 0;\n${original}`,
+        },
+      }),
+    };
+  }
+  if (error.name === 'TypeError' || /null|undefined/.test(msg)) {
+    return {
+      explanation: l(
+        'The code tried to use something that is not there.',
+        'कोड ने कुछ ऐसा इस्तेमाल करने की कोशिश की जो वहाँ है ही नहीं।',
+        'Code ne kuch aisa use karne ki koshish ki jo wahan hai hi nahi.',
+      ),
+      likelyCause: l(
+        'An element id in script.js may not match the id in index.html.',
+        'script.js की कोई id index.html की id से मेल नहीं खाती होगी।',
+        'script.js ki koi id index.html ki id se match nahi karti hogi.',
+      ),
+    };
+  }
+  if (error.name === 'SyntaxError') {
+    return {
+      explanation: l(
+        'The code is written in a way the computer cannot read.',
+        'कोड ऐसे लिखा है जिसे कंप्यूटर पढ़ नहीं सकता।',
+        'Code aise likha hai jise computer padh nahi sakta.',
+      ),
+      likelyCause: l(
+        'A bracket, quote or comma may be missing.',
+        'कोई ब्रैकेट, कोट या कॉमा छूट गया होगा।',
+        'Koi bracket, quote ya comma chhoot gaya hoga.',
+      ),
+    };
+  }
+  return {
+    explanation: l(
+      'Something went wrong while your project was running.',
+      'तुम्हारा प्रोजेक्ट चलते समय कुछ गड़बड़ हो गई।',
+      'Tumhara project chalte samay kuch gadbad ho gayi.',
+    ),
+    likelyCause: l(
+      'Read the line that is named and check each word.',
+      'जो लाइन बताई गई है उसे पढ़ो और हर शब्द जाँचो।',
+      'Jo line batayi gayi hai use padho aur har shabd jaancho.',
+    ),
+  };
+}

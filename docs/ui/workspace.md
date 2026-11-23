@@ -39,6 +39,9 @@ Layout shell for viewing a project's files. Code lives in `apps/web/src/features
 
 Explanation results also show a picture when the AI sends one (Prompt 28, `docs/ai/visual-explanations.md`).
 
+## Debugging help (Prompt 30)
+`DebugPanel` appears when a run reports a problem and explains it, keeping what the preview reported apart from the AI's guess; a suggested fix is added only as an unsaved edit. See `docs/ui/debugging.md` and `docs/api/debug.md`.
+
 ## Try a change (Prompt 29)
 `ExperimentPanel` ("Try a change") lets the child describe a change in words (or pick an idea chip) and calls `POST /projects/:id/experiments` with the version they are looking at. It is disabled while any file has unsaved edits, because a change is made from the saved project. On success it lists the changed files with a child-friendly summary in the chosen language and says "Your earlier version is safe"; **Open the new version** reloads the workspace on version 2, shows "This is version 2. You changed style.css." and marks those files "changed" in the file list. Blocked, too-short and no-change answers show a calm note; "newer version" offers **Open it again**; limits show the server's friendly text. See `docs/api/experiments.md`.
 

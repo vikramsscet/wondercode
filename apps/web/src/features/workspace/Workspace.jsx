@@ -3,6 +3,7 @@ import { Alert, Badge, Button, Card } from '../../components/ui/index.js';
 import { cn } from '../../utils/cn.js';
 import { clearDraft, loadDraft, saveDraft } from './drafts.js';
 import ExplainPanel from './ExplainPanel.jsx';
+import DebugPanel from './DebugPanel.jsx';
 import ExperimentPanel from './ExperimentPanel.jsx';
 import TeacherPanel from './TeacherPanel.jsx';
 import EditorPane from './EditorPane.jsx';
@@ -39,6 +40,7 @@ export default function Workspace({
   const [pending, setPending] = useState(() =>
     draftKey ? loadDraft(draftKey, project.files) : null,
   );
+  const [runInfo, setRunInfo] = useState(null); // { problem, changed, status } from the preview
   const dirtyCount = Object.keys(edits).length;
 
   useEffect(() => {
@@ -64,6 +66,12 @@ export default function Workspace({
   const discard = () => {
     clearDraft(draftKey);
     setPending(null);
+  };
+  // A suggested fix is only ever added as an unsaved edit the child can see, run and reset.
+  const applyFix = (path, content) => {
+    setEdits((prev) => ({ ...prev, [path]: content }));
+    setActivePath(path);
+    setTab('code');
   };
   const resetFile = (path) =>
     setEdits((prev) => {
@@ -192,9 +200,17 @@ export default function Workspace({
               content: edits[f.path] ?? f.content,
             }))}
             onStart={() => setTab('preview')}
+            onRun={setRunInfo}
           />
         </div>
       </div>
+      <DebugPanel
+        debug={explain}
+        run={runInfo}
+        files={project.files}
+        edited={dirtyCount > 0}
+        onApplyFix={applyFix}
+      />
       <ExplainPanel
         explain={explain}
         file={file}

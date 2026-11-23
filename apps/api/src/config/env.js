@@ -55,6 +55,10 @@ export function loadConfig(source = process.env) {
       dailyLimitGuest: positiveInt(source, 'EXPERIMENT_DAILY_LIMIT_GUEST', 5),
       maxVersions: positiveInt(source, 'PROJECT_MAX_VERSIONS', 30),
     },
+    debug: {
+      dailyLimitChild: positiveInt(source, 'DEBUG_DAILY_LIMIT_CHILD', 40),
+      dailyLimitGuest: positiveInt(source, 'DEBUG_DAILY_LIMIT_GUEST', 5),
+    },
     supabase: {
       url: source.SUPABASE_URL || '',
       serviceRoleKey: source.SUPABASE_SERVICE_ROLE_KEY || '',

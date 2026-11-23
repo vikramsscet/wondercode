@@ -12,6 +12,7 @@ export const OPERATIONS = [
   'explainCode',
   'refineProject',
   'answerTeacherQuestion',
+  'debugError',
 ];
 
 export class AIProvider {
@@ -38,5 +39,9 @@ export class AIProvider {
 
   async answerTeacherQuestion() {
     throw new Error(`${this.name} does not implement answerTeacherQuestion`);
+  }
+
+  async debugError() {
+    throw new Error(`${this.name} does not implement debugError`);
   }
 }

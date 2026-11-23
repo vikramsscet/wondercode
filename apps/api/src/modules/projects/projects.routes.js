@@ -3,6 +3,8 @@ import { requireOwner } from '../../middleware/requireOwner.js';
 import { validate } from '../../middleware/validate.js';
 import { sendSuccess } from '../../utils/response.js';
 import { generateBody, projectIdParams, validateBody } from './projects.schemas.js';
+import { debugBody } from './debug.schemas.js';
+import { debugRun } from './debug.service.js';
 import { experimentBody } from './experiments.schemas.js';
 import { runExperiment } from './experiments.service.js';
 import * as service from './projects.service.js';
@@ -52,6 +54,29 @@ export function createProjectsRouter(config) {
       next(err);
     }
   });
+
+  router.post(
+    '/:projectId/debug',
+    validate({ params: projectIdParams, body: debugBody }),
+    async (req, res, next) => {
+      try {
+        const { projectId } = req.validated.params;
+        sendSuccess(
+          req,
+          res,
+          await debugRun(
+            ctx(req),
+            req.owner,
+            req.guest ? null : req.child,
+            projectId,
+            req.validated.body,
+          ),
+        );
+      } catch (err) {
+        next(err);
+      }
+    },
+  );
 
   router.post(
     '/:projectId/experiments',

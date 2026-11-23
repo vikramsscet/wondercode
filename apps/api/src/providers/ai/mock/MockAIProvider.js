@@ -6,6 +6,7 @@ import {
   PLAN_DETAILS,
   TEMPLATES,
   VISUALS,
+  debugFor,
   detectConcept,
   detectType,
   languageOf,
@@ -147,5 +148,9 @@ export class MockAIProvider extends AIProvider {
       },
       input,
     );
+  }
+
+  async debugError(input) {
+    return done(debugFor(input), input);
   }
 }

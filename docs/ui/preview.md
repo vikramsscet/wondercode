@@ -42,6 +42,9 @@ State lives in `preview/usePreviewRunner.js`.
 
 Heartbeats are not counted towards the message cap (a Prompt 22 bug would have killed a healthy page after about 200 seconds).
 
+## Error details (Prompt 30)
+The bootstrap also reports an error's type, line and column. `buildPreview` returns where the child's script sits in the page so the runner can map a page line back to a line of `script.js` (dropped if outside the script). See `docs/ui/debugging.md`.
+
 ## Child-friendly states
 Console output appears under "Messages from your project". Runtime errors, blocked network access, a missing `index.html` and an unresponsive page each show a calm message.
 

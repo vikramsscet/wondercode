@@ -48,7 +48,7 @@ async function recordBlocked(supabase, logger, owner, category) {
 }
 
 // The saved files of a version, hash-checked, as { path, language, content }.
-async function loadVersionFiles(supabase, versionId) {
+export async function loadVersionFiles(supabase, versionId) {
   const rows = await repo.listFiles(supabase, versionId);
   const files = [];
   for (const row of rows) {

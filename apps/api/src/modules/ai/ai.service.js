@@ -128,5 +128,6 @@ export function createAIService({ provider, config, supabase = null, logger = co
     explainCode: operation('explainCode'),
     refineProject: operation('refineProject'),
     answerTeacherQuestion: operation('answerTeacherQuestion'),
+    debugError: operation('debugError'),
   };
 }

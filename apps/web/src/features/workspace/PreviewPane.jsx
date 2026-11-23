@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Alert, Button } from '../../components/ui/index.js';
 import { usePreviewRunner } from './preview/usePreviewRunner.js';
 
@@ -12,7 +12,8 @@ const STATUS_TEXT = {
 const PROBLEMS = {
   blocked: () => "Your project tried to reach the internet, which isn't allowed here.",
   missing: () => "We couldn't find index.html, so there is nothing to show yet.",
-  error: (p) => `Your code hit a problem: ${p.message}`,
+  error: (p) =>
+    `Your code hit a problem: ${p.message}${p.line ? ` (${p.filePath}, line ${p.line})` : ''}`,
   unresponsive: () =>
     "Your project stopped because it wasn't responding. Check for a loop that never ends.",
   startTimeout: () => 'Your project took too long to start, so we stopped it. Try Run again.',
@@ -21,9 +22,13 @@ const PROBLEMS = {
 
 // Runs the project in a sandboxed iframe (see preview/ and docs/ui/preview.md). It only starts
 // when the child presses Run or Restart, and runs a snapshot of the files at that moment.
-export default function PreviewPane({ files, onStart }) {
+export default function PreviewPane({ files, onStart, onRun }) {
   const frameRef = useRef(null);
   const r = usePreviewRunner(files, frameRef);
+  // Tell the workspace how the run is going (for the debugging helper).
+  useEffect(() => {
+    onRun?.({ problem: r.problem, changed: r.changed, status: r.status });
+  }, [onRun, r.problem, r.changed, r.status]);
   const live = r.status === 'starting' || r.status === 'running';
   const go = () => {
     onStart?.();

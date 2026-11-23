@@ -167,6 +167,50 @@ export const teacherInput = z
   })
   .strict();
 
+// ----- debugging assistant (Prompt 30) -----
+// `error` is what the browser's preview REPORTED (untrusted, cleaned by the API). `context` is
+// read from the saved project by the server. The answer separates facts from guesses.
+export const debugInput = z
+  .object({
+    error: z
+      .object({
+        kind: z.enum(['error', 'unresponsive', 'blocked']),
+        name: z.string().max(40).optional(),
+        message: z.string().max(300).optional(),
+        filePath: filePath.optional(),
+        line: z.number().int().min(1).optional(),
+      })
+      .strict(),
+    explanationLanguage: language.default('en'),
+    age: z.number().int().min(8).max(12).optional(),
+    rules: z.array(text(200)).max(10).optional(),
+    context: z
+      .object({
+        projectTitle: text(100).optional(),
+        filePath: filePath.optional(),
+        lineStart: z.number().int().min(1).optional(),
+        lineEnd: z.number().int().min(1).optional(),
+        code: z.string().max(2000).optional(),
+      })
+      .optional(),
+  })
+  .strict();
+
+export const debugAnswer = z.object({
+  explanation: localized(400), // what the error means
+  likelyCause: localized(300), // a hypothesis, not a fact
+  fix: z
+    .object({
+      description: localized(300),
+      filePath,
+      lineStart: z.number().int().min(1),
+      lineEnd: z.number().int().min(1),
+      replacement: z.string().max(600), // replaces those lines; validated by the API
+    })
+    .strict()
+    .optional(),
+});
+
 // operation name -> { input, output }
 export const OPERATION_SCHEMAS = {
   generateProjectPlan: { input: planInput, output: projectPlan, event: 'ai.project_plan' },
@@ -174,4 +218,5 @@ export const OPERATION_SCHEMAS = {
   explainCode: { input: explainInput, output: codeExplanation, event: 'ai.explain_code' },
   refineProject: { input: refineInput, output: refinedProject, event: 'ai.refine_project' },
   answerTeacherQuestion: { input: teacherInput, output: teacherAnswer, event: 'ai.teacher_answer' },
+  debugError: { input: debugInput, output: debugAnswer, event: 'ai.debug_error' },
 };

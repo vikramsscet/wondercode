@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { buildPreviewDocument } from './buildPreviewDocument.js';
+import { buildPreview } from './buildPreviewDocument.js';
 import {
   HEARTBEAT_TIMEOUT_MS,
   MAX_LOG_CHARS,
@@ -38,7 +38,8 @@ export function usePreviewRunner(files, frameRef) {
 
   const start = useCallback(() => {
     const nonce = newNonce();
-    const srcDoc = buildPreviewDocument(files, nonce);
+    const built = buildPreview(files, nonce);
+    const srcDoc = built?.srcDoc;
     setLogs([]);
     setHidden(false);
     t.current = { started: Date.now(), beat: Date.now(), total: 0, windowStart: 0, windowCount: 0 };
@@ -50,7 +51,7 @@ export function usePreviewRunner(files, frameRef) {
     }
     setProblem(null);
     setStatus('starting');
-    setRun({ nonce, srcDoc, key: keyOf(files) });
+    setRun({ nonce, srcDoc, key: keyOf(files), script: built.script });
   }, [files]);
 
   const stop = useCallback(() => halt(null), [halt]);
@@ -82,7 +83,17 @@ export function usePreviewRunner(files, frameRef) {
           return next;
         });
       } else if (msg.type === 'error') {
-        setProblem({ kind: 'error', message: msg.message });
+        // Turn the page line into a line of the child's script, only if it really falls inside it.
+        const s = run.script;
+        const rel = s && msg.line ? msg.line - s.startLine + 1 : 0;
+        const place = rel >= 1 && rel <= s.lineCount ? { filePath: s.path, line: rel } : {};
+        setProblem({
+          kind: 'error',
+          message: msg.message,
+          ...(msg.name && { name: msg.name }),
+          ...(msg.column && place.line && { column: msg.column }),
+          ...place,
+        });
       } else if (msg.type === 'blocked') {
         setProblem({ kind: 'blocked' });
       }

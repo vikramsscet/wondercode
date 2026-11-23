@@ -10,6 +10,7 @@ export const MAX_RUN_MS = 10 * 60 * 1000; // a run is stopped after 10 minutes
 
 const LEVELS = ['log', 'info', 'warn', 'error'];
 const clip = (v) => String(v ?? '').slice(0, MAX_TEXT);
+const position = (v) => (Number.isInteger(v) && v >= 1 && v <= 1_000_000 ? v : undefined);
 
 // Returns a clean { type, ... } message, or null if the event must be ignored.
 // A sandbox without allow-same-origin has the opaque origin "null".
@@ -30,7 +31,13 @@ export function acceptMessage(event, frameWindow, nonce) {
         text: clip(m.d?.text),
       };
     case 'error':
-      return { type: 'error', message: clip(m.d?.message) };
+      return {
+        type: 'error',
+        message: clip(m.d?.message),
+        ...(/^[A-Za-z]{1,30}$/.test(m.d?.name ?? '') && { name: m.d.name }),
+        ...(position(m.d?.line) && { line: m.d.line }),
+        ...(position(m.d?.column) && { column: m.d.column }),
+      };
     default:
       return null;
   }

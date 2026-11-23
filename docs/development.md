@@ -64,4 +64,5 @@ The service-role key and AI keys must never appear in frontend code or `VITE_*` 
 | 27 Context-aware AI teacher (context, age rules, limits, stored chats) | Done, approved |
 | 28 Visual explanations (`visual` format, `VisualExplanation`) | Done, approved |
 | 29 Experiment Mode (`POST /projects/:id/experiments`, "Try a change") | Done, approved |
-| 30 onward | Not started |
+| 30 Debugging assistant (`POST /projects/:id/debug`, "Help me fix it") | Done, awaiting review |
+| 31 onward | Not started |
