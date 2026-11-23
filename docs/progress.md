@@ -34,7 +34,7 @@ _Last updated: 2026-11-23._ The roadmap is the 42 prompts in `WonderCode_Product
 - Never commit secrets. The service-role key stays in `apps/api/.env` only.
 
 ## Things to know
-- **Git:** Prompts 02 to 23 are committed and pushed to `origin/main` . Commit and push after each approved prompt, and check `git status` shows no `.env` files first.
+- **Git:** Prompts 02 to 30 are committed and pushed to `origin/main` (latest `85d52ac`; Prompt 30 is pushed but not yet approved). Commit and push after each approved prompt, and check `git status` shows no `.env` files first.
 - **Never put real keys in `.env.example`.** Real values belong only in the git-ignored `.env` files.
 - Supabase project is the dev one only; production is not configured. Migrations were applied by pasting SQL in the dashboard.
 - Mock AI is the only provider; real providers are deferred (ADR 0002, `docs/ai/provider-architecture.md`).
