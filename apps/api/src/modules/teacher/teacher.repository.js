@@ -1,3 +1,5 @@
+import { countUsageSince } from '../ai/usage.repository.js';
+
 // Teacher conversations. Every read is scoped by owner (child profile or guest session).
 const check = ({ data, error }) => {
   if (error) throw error;
@@ -75,17 +77,8 @@ export async function deleteConversation(supabase, id) {
 }
 
 // AI answers given to this owner since `sinceIso` (from the usage meter).
-export async function countAnswersSince(supabase, owner, sinceIso) {
-  const [col, val] = ownerColumn(owner);
-  const { count, error } = await supabase
-    .from('usage_events')
-    .select('id', { count: 'exact', head: true })
-    .eq(col, val)
-    .eq('event_type', 'ai.teacher_answer')
-    .gte('created_at', sinceIso);
-  if (error) throw error;
-  return count ?? 0;
-}
+export const countAnswersSince = (supabase, owner, sinceIso) =>
+  countUsageSince(supabase, owner, 'ai.teacher_answer', sinceIso);
 
 export async function deleteExpiredMessages(supabase, nowIso) {
   return check(

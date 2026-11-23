@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Alert, Button, LoadingState, buttonClasses } from '../components/ui/index.js';
 import { useChildProfiles } from '../features/child-profile/ChildProfilesContext.jsx';
@@ -20,6 +21,7 @@ function ProjectWorkspace({
   defaultLanguage,
 }) {
   const { status, project, reload } = useProject(projectId, { childId, guestToken });
+  const [highlight, setHighlight] = useState(null); // what the last experiment changed
   if (status === 'loading') return <LoadingState message="Opening your project…" />;
   if (status === 'notfound') {
     return (
@@ -50,6 +52,15 @@ function ProjectWorkspace({
       checked={project.validated}
       draftKey={draftKey(ownerId, projectId, project.version.id)}
       explain={{ projectId, versionId: project.version.id, childId, guestToken, defaultLanguage }}
+      highlight={highlight}
+      onReload={reload}
+      onNewVersion={(result) => {
+        setHighlight({
+          version: result.version.versionNumber,
+          paths: result.changedFiles.map((c) => c.path),
+        });
+        reload();
+      }}
     />
   );
 }

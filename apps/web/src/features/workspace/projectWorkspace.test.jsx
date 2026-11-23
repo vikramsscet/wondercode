@@ -138,6 +138,62 @@ describe('opening a saved project', () => {
   });
 });
 
+describe('experiments', () => {
+  const V2 = {
+    ...PROJECT,
+    version: { id: 'v2', versionNumber: 2 },
+    files: [
+      PROJECT.files[0],
+      { path: 'script.js', language: 'javascript', content: 'let a = 2;', sizeBytes: 10 },
+    ],
+  };
+  const RESULT = {
+    status: 'ok',
+    version: { id: 'v2', versionNumber: 2, origin: 'refined' },
+    previousVersionId: 'v1',
+    changedFiles: [{ path: 'script.js', summary: { en: 'Changed the number.' } }],
+  };
+
+  it('opens the new version, marks what changed, and keeps drafts per version', async () => {
+    asChild();
+    let served = PROJECT;
+    calls = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url, init = {}) => {
+        calls.push({ url, method: init.method ?? 'GET' });
+        if (url.endsWith('/children')) return reply(200, { success: true, data: [MIA] });
+        if (url.endsWith('/experiments')) {
+          served = V2;
+          return reply(200, { success: true, data: RESULT });
+        }
+        if (url.includes('/teacher/')) {
+          return reply(200, { success: true, data: { conversationId: null, messages: [] } });
+        }
+        return reply(200, { success: true, data: served });
+      }),
+    );
+    window.localStorage.setItem(
+      draftKey('c1', 'p1', 'v1'),
+      JSON.stringify({ savedAt: Date.now(), edits: { 'script.js': 'old draft' } }),
+    );
+    renderAt('/workspace/p1');
+    await userEvent.click(await screen.findByRole('button', { name: 'Throw away' }));
+    await userEvent.type(screen.getByLabelText('What do you want to change?'), 'Change the number');
+    await userEvent.click(screen.getByRole('button', { name: 'Try it' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Open the new version' }));
+
+    expect(await screen.findByText('Version 2, checked')).toBeInTheDocument();
+    expect(screen.getByText(/This is version 2\. You changed script\.js/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /script\.js/ })).toHaveTextContent('changed');
+    expect(screen.getByRole('button', { name: /index\.html/ })).not.toHaveTextContent('changed');
+    await userEvent.click(screen.getByRole('button', { name: /script\.js/ }));
+    expect(await editor('script.js')).toHaveValue('let a = 2;');
+    const post = calls.find((c) => c.url.endsWith('/experiments'));
+    expect(post.method).toBe('POST');
+  });
+});
+
 describe('editing, preview and unsaved edits', () => {
   it('previews exactly the code in the editor', async () => {
     asChild();

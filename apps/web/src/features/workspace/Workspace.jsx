@@ -3,6 +3,7 @@ import { Alert, Badge, Button, Card } from '../../components/ui/index.js';
 import { cn } from '../../utils/cn.js';
 import { clearDraft, loadDraft, saveDraft } from './drafts.js';
 import ExplainPanel from './ExplainPanel.jsx';
+import ExperimentPanel from './ExperimentPanel.jsx';
 import TeacherPanel from './TeacherPanel.jsx';
 import EditorPane from './EditorPane.jsx';
 import FileExplorer from './FileExplorer.jsx';
@@ -17,7 +18,17 @@ const TABS = [
 
 // Three panes: files | code | preview. From the lg breakpoint they sit side by side; on smaller
 // screens a tab bar shows one at a time (all stay mounted so nothing resets when switching).
-export default function Workspace({ files, title, version, checked, draftKey, explain }) {
+export default function Workspace({
+  files,
+  title,
+  version,
+  checked,
+  draftKey,
+  explain,
+  highlight,
+  onNewVersion,
+  onReload,
+}) {
   const sample = !files;
   const project = sample ? MOCK_PROJECT : { title, files };
   const [activePath, setActivePath] = useState(project.files[0]?.path);
@@ -76,6 +87,12 @@ export default function Workspace({ files, title, version, checked, draftKey, ex
         {sample && <Badge tone="sun">Sample</Badge>}
         {version && <Badge tone="mint">{`Version ${version}${checked ? ', checked' : ''}`}</Badge>}
       </div>
+      {highlight && (
+        <Alert tone="success" className="mb-3">
+          This is version {highlight.version}. You changed {highlight.paths.join(', ')}. Your
+          earlier version is safe.
+        </Alert>
+      )}
       {pending && (
         <Alert tone="info" className="mb-3">
           We found changes you hadn't saved ({Object.keys(pending).length} file
@@ -128,7 +145,12 @@ export default function Workspace({ files, title, version, checked, draftKey, ex
           aria-label="Files pane"
           className={cn('rounded-card bg-white p-3 shadow-soft lg:overflow-auto', show('files'))}
         >
-          <FileExplorer files={project.files} activePath={activePath} onSelect={select} />
+          <FileExplorer
+            files={project.files}
+            activePath={activePath}
+            onSelect={select}
+            changed={highlight ? new Set(highlight.paths) : undefined}
+          />
         </div>
         <div
           id="pane-code"
@@ -178,6 +200,12 @@ export default function Workspace({ files, title, version, checked, draftKey, ex
         file={file}
         edited={Boolean(file) && file.path in edits}
         selection={selection}
+      />
+      <ExperimentPanel
+        experiment={explain}
+        edited={dirtyCount > 0}
+        onOpen={onNewVersion}
+        onReload={onReload}
       />
       {explain ? (
         <TeacherPanel

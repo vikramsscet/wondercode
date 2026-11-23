@@ -32,7 +32,7 @@ async function generateValidCode({ ai, logger = console }, owner, plan, language
   throw last;
 }
 
-const present = (project, version, files, validation, extra = {}) => ({
+export const present = (project, version, files, validation, extra = {}) => ({
   project: {
     id: project.id,
     title: project.title,

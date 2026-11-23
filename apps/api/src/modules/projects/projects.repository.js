@@ -54,3 +54,34 @@ export async function listFiles(supabase, versionId) {
     await supabase.from('project_files').select('*').eq('version_id', versionId).order('file_path'),
   );
 }
+
+// ----- versions (Prompt 29) -----
+export async function listVersionNumbers(supabase, projectId) {
+  const rows = check(
+    await supabase
+      .from('project_versions')
+      .select('version_number')
+      .eq('project_id', projectId)
+      .order('version_number', { ascending: false }),
+  );
+  return rows.map((r) => r.version_number);
+}
+
+// Moves the project to a new version only if it is still on `fromVersionId` (compare-and-set).
+// Returns the updated rows: empty means somebody else changed the project first.
+export async function setCurrentVersionIf(supabase, projectId, fromVersionId, toVersionId) {
+  return check(
+    await supabase
+      .from('projects')
+      .update({ current_version_id: toVersionId })
+      .eq('id', projectId)
+      .eq('current_version_id', fromVersionId)
+      .select('id'),
+  );
+}
+
+// Removes a version that was never made current (cleanup after a failed save).
+export async function deleteVersion(supabase, versionId) {
+  check(await supabase.from('project_files').delete().eq('version_id', versionId));
+  return check(await supabase.from('project_versions').delete().eq('id', versionId));
+}

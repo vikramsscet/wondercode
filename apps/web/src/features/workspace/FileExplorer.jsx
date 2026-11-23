@@ -5,7 +5,7 @@ const ICONS = { html: '🌐', css: '🎨', js: '⚡' };
 const iconFor = (path) => ICONS[path.split('.').pop()] ?? '📄';
 
 // List of project files. Up/Down/Home/End move between files; the active one has aria-current.
-export default function FileExplorer({ files, activePath, onSelect }) {
+export default function FileExplorer({ files, activePath, onSelect, changed }) {
   const refs = useRef([]);
   const onKeyDown = (e, i) => {
     const last = files.length - 1;
@@ -41,6 +41,11 @@ export default function FileExplorer({ files, activePath, onSelect }) {
             >
               <span aria-hidden="true">{iconFor(f.path)}</span>
               {f.path}
+              {changed?.has(f.path) && (
+                <span className="ml-auto rounded-full bg-sun-100 px-2 text-xs font-bold text-sun-800">
+                  changed
+                </span>
+              )}
             </button>
           </li>
         ))}
